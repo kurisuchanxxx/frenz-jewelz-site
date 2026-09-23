@@ -1,0 +1,115 @@
+---
+import SanityImage from './SanityImage.astro'
+import {formatPrice} from '../lib/money'
+import {getAvailability} from '../lib/availability'
+import type {ProductCard} from '../lib/types'
+
+interface Props {
+  product: ProductCard
+  priority?: boolean
+}
+const {product, priority = false} = Astro.props
+const availability = getAvailability(product)
+const badge =
+  availability === 'esaurito' || availability === 'nonInVendita'
+    ? 'Esaurito'
+    : availability === 'suOrdinazione'
+      ? 'Su ordinazione'
+      : product.productionType === 'pezzoUnico'
+        ? 'Pezzo unico'
+        : null
+---
+
+<a href={`/shop/${product.slug}`} class="card" data-soldout={availability === 'esaurito' || availability === 'nonInVendita'}>
+  <div class="card__media">
+    {
+      product.image ? (
+        <SanityImage
+          image={product.image}
+          aspect={4 / 5}
+          sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+          widths={[240, 360, 480, 640, 800]}
+          priority={priority}
+        />
+      ) : (
+        <div class="card__placeholder" />
+      )
+    }
+    {badge && <span class="card__badge">{badge}</span>}
+  </div>
+  <div class="card__info">
+    <h3 class="card__title">{product.title}</h3>
+    <p class="card__price">
+      {product.compareAtPrice && <s>{formatPrice(product.compareAtPrice)}</s>}
+      {formatPrice(product.price)}
+    </p>
+  </div>
+</a>
+
+<style>
+  .card {
+    display: block;
+    text-decoration: none;
+  }
+
+  .card__media {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    background: var(--card-bg);
+    overflow: hidden;
+  }
+
+  .card__media :global(img),
+  .card__placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s var(--ease);
+  }
+
+  .card:hover .card__media :global(img) {
+    transform: scale(1.03);
+  }
+
+  .card[data-soldout='true'] .card__media :global(img) {
+    opacity: 0.5;
+  }
+
+  .card__badge {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    padding: 0.3em 0.8em;
+    border-radius: var(--radius-pill);
+    background: var(--black);
+    color: var(--white);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .card__info {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding-top: 0.75rem;
+  }
+
+  .card__title {
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+  }
+
+  .card__price {
+    margin: 0;
+    font-size: 0.9375rem;
+    white-space: nowrap;
+  }
+
+  .card__price s {
+    color: var(--grey-500);
+    margin-right: 0.4em;
+  }
+</style>

@@ -1,0 +1,142 @@
+---
+interface Props {
+  announcement?: string
+}
+const {announcement} = Astro.props
+const path = Astro.url.pathname
+
+const NAV = [
+  {href: '/shop', label: 'Shop'},
+  {href: '/su-misura', label: 'Su misura'},
+  {href: '/collab', label: 'Collab'},
+  {href: '/about', label: 'About'},
+]
+const isActive = (href: string) => path === href || path.startsWith(`${href}/`)
+---
+
+{announcement && <div class="announcement">{announcement}</div>}
+<header class="header">
+  <div class="container header__inner">
+    <a href="/" class="logo" aria-label="Frenz Jewelz, home">
+      <!-- Placeholder: sostituire con il logo graffiti cromato (SVG/PNG in /public) -->
+      <span class="logo__text">FRENZ</span>
+    </a>
+
+    <nav class="nav" aria-label="Principale">
+      <ul>
+        {
+          NAV.map((item) => (
+            <li>
+              <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <!-- Carrello: diventa un'isola interattiva (drawer) in fase 3 -->
+    <a href="/shop" class="cart-link" aria-label="Carrello">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <path d="M6 7h12l-1 13H7L6 7Z"></path>
+        <path d="M9 7a3 3 0 0 1 6 0"></path>
+      </svg>
+    </a>
+  </div>
+</header>
+
+<style>
+  .announcement {
+    background: var(--white);
+    color: var(--black);
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.5em var(--gutter);
+  }
+
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgb(0 0 0 / 0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--grey-900);
+  }
+
+  .header__inner {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    min-height: var(--header-h);
+  }
+
+  .logo {
+    text-decoration: none;
+  }
+
+  .logo__text {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 1.75rem;
+    letter-spacing: -0.02em;
+    background: linear-gradient(180deg, #fff 0%, #9a9a9a 55%, #fff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .nav ul {
+    display: flex;
+    justify-content: center;
+    gap: clamp(1rem, 3vw, 2.5rem);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .nav a {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--grey-300);
+    transition: color 0.2s var(--ease);
+  }
+
+  .nav a:hover,
+  .nav a[aria-current='page'] {
+    color: var(--white);
+  }
+
+  .cart-link {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+  }
+
+  @media (max-width: 640px) {
+    .header__inner {
+      grid-template-columns: 1fr auto;
+      row-gap: 0;
+      padding-block: 0.5rem;
+    }
+
+    .nav {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      overflow-x: auto;
+    }
+
+    .nav ul {
+      justify-content: space-between;
+      padding-block: 0.5rem;
+    }
+  }
+</style>

@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+---
+
+<BaseLayout title="Pagina non trovata" noindex>
+  <section class="container notfound">
+    <p class="code" aria-hidden="true">404</p>
+    <h1>Qui non c’è niente</h1>
+    <p>La pagina che cerchi non esiste o è stata spostata. Magari il pezzo che volevi è nello shop.</p>
+    <div class="actions">
+      <a href="/shop" class="btn btn--solid">Vai allo shop</a>
+      <a href="/" class="btn">Home</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .notfound {
+    padding-block: clamp(4rem, 12vw, 10rem);
+  }
+
+  .code {
+    font-weight: 900;
+    font-size: clamp(6rem, 25vw, 18rem);
+    line-height: 0.8;
+    letter-spacing: -0.05em;
+    margin: 0 0 1rem;
+    color: var(--grey-900);
+    -webkit-text-stroke: 1px var(--grey-500);
+  }
+
+  .notfound h1 {
+    margin-bottom: 1rem;
+  }
+
+  .notfound p:not(.code) {
+    max-width: 45ch;
+    color: var(--grey-300);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+</style>

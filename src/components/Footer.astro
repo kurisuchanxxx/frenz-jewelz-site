@@ -1,0 +1,110 @@
+---
+interface Props {
+  instagramUrl?: string
+  facebookUrl?: string
+  contactEmail?: string
+}
+const {instagramUrl, facebookUrl, contactEmail} = Astro.props
+const year = new Date().getFullYear()
+
+const INFO = [
+  {href: '/spedizioni-resi', label: 'Spedizioni e resi'},
+  {href: '/guida', label: 'Taglie e cura dell’argento'},
+  {href: '/su-misura', label: 'Su misura'},
+]
+const LEGAL = [
+  {href: '/termini', label: 'Termini e condizioni'},
+  {href: '/privacy', label: 'Privacy policy'},
+  {href: '/cookie', label: 'Cookie policy'},
+]
+---
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer__cols">
+      <nav aria-label="Informazioni">
+        <p class="eyebrow">Info</p>
+        <ul>{INFO.map((l) => <li><a href={l.href}>{l.label}</a></li>)}</ul>
+      </nav>
+      <nav aria-label="Note legali">
+        <p class="eyebrow">Legale</p>
+        <ul>{LEGAL.map((l) => <li><a href={l.href}>{l.label}</a></li>)}</ul>
+      </nav>
+      <div>
+        <p class="eyebrow">Contatti</p>
+        <ul>
+          {contactEmail && <li><a href={`mailto:${contactEmail}`}>{contactEmail}</a></li>}
+          {instagramUrl && <li><a href={instagramUrl} rel="noopener" target="_blank">Instagram</a></li>}
+          {facebookUrl && <li><a href={facebookUrl} rel="noopener" target="_blank">Facebook</a></li>}
+        </ul>
+      </div>
+    </div>
+
+    <p class="wordmark" aria-hidden="true">FRENZ JEWELZ</p>
+
+    <div class="footer__bottom">
+      <span>© {year} Frenz Jewelz · Ancona</span>
+      <!-- TODO: link al sito di Ctrl Studio -->
+      <span>Site by Ctrl Studio</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--grey-900);
+    padding-top: clamp(3rem, 8vw, 6rem);
+    margin-top: clamp(4rem, 10vw, 8rem);
+    overflow: hidden;
+  }
+
+  .footer__cols {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 2rem;
+  }
+
+  .footer ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .footer a {
+    color: var(--grey-300);
+    text-decoration: none;
+    font-size: 0.9375rem;
+  }
+
+  .footer a:hover {
+    color: var(--white);
+  }
+
+  .wordmark {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(3rem, 13.5vw, 13rem);
+    line-height: 0.85;
+    letter-spacing: -0.04em;
+    white-space: nowrap;
+    margin: clamp(3rem, 8vw, 6rem) 0 1.5rem;
+  }
+
+  .footer__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 2rem;
+    padding-block: 1.5rem;
+    border-top: 1px solid var(--grey-900);
+    font-size: 0.8125rem;
+    color: var(--grey-500);
+  }
+
+  .footer__bottom a {
+    font-size: inherit;
+    color: var(--grey-500);
+  }
+</style>

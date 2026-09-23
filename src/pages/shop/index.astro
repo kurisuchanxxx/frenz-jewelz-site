@@ -1,0 +1,175 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import ProductCard from '../../components/ProductCard.astro'
+import {sanity} from '../../lib/sanity'
+import {CATEGORIES_QUERY, PRODUCTS_QUERY} from '../../lib/queries'
+import {getAvailability, isPurchasable} from '../../lib/availability'
+import type {Category, ProductCard as Card} from '../../lib/types'
+
+const SORTS = {
+  consigliati: 'Consigliati',
+  'prezzo-crescente': 'Prezzo crescente',
+  'prezzo-decrescente': 'Prezzo decrescente',
+} as const
+type Sort = keyof typeof SORTS
+
+const [categories, allProducts] = await Promise.all([
+  sanity.fetch<Category[]>(CATEGORIES_QUERY),
+  sanity.fetch<Card[]>(PRODUCTS_QUERY),
+])
+
+// Filtro e ordinamento via query string: funzionano senza JavaScript e sono condivisibili.
+const params = Astro.url.searchParams
+const activeCategory = categories.find((c) => c.slug === params.get('categoria'))
+const sortParam = params.get('ordina')
+const sort: Sort = sortParam && sortParam in SORTS ? (sortParam as Sort) : 'consigliati'
+
+// Solo le categorie con almeno un prodotto, per non mostrare filtri vuoti.
+const usedCategories = categories.filter((c) => allProducts.some((p) => p.category?._id === c._id))
+
+let products = activeCategory ? allProducts.filter((p) => p.category?._id === activeCategory._id) : allProducts
+if (sort === 'prezzo-crescente') products = products.toSorted((a, b) => a.price - b.price)
+else if (sort === 'prezzo-decrescente') products = products.toSorted((a, b) => b.price - a.price)
+// Consigliati: ordine di Studio, esauriti in fondo.
+else products = products.toSorted((a, b) => Number(!isPurchasable(getAvailability(a))) - Number(!isPurchasable(getAvailability(b))))
+
+const hrefFor = (categoria?: string) => {
+  const q = new URLSearchParams()
+  if (categoria) q.set('categoria', categoria)
+  if (sort !== 'consigliati') q.set('ordina', sort)
+  const s = q.toString()
+  return s ? `/shop?${s}` : '/shop'
+}
+---
+
+<BaseLayout
+  title={activeCategory ? activeCategory.title : 'Shop'}
+  description="Collane, ciondoli, anelli e bracciali in argento 925 fatti a mano ad Ancona."
+>
+  <div class="container shop">
+    <header class="shop__head">
+      <h1>{activeCategory?.title ?? 'Shop'}</h1>
+
+      <div class="shop__controls">
+        {
+          usedCategories.length > 1 && (
+            <nav aria-label="Categorie">
+              <ul class="filters">
+                <li>
+                  <a href={hrefFor()} aria-current={!activeCategory ? 'page' : undefined}>Tutti</a>
+                </li>
+                {usedCategories.map((c) => (
+                  <li>
+                    <a href={hrefFor(c.slug)} aria-current={activeCategory?._id === c._id ? 'page' : undefined}>
+                      {c.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          )
+        }
+
+        <form method="get" class="sort" data-autosubmit>
+          {activeCategory && <input type="hidden" name="categoria" value={activeCategory.slug} />}
+          <label for="ordina" class="visually-hidden">Ordina per</label>
+          <select id="ordina" name="ordina">
+            {Object.entries(SORTS).map(([value, label]) => <option value={value} selected={value === sort}>{label}</option>)}
+          </select>
+          <noscript><button type="submit" class="btn">Ordina</button></noscript>
+        </form>
+      </div>
+    </header>
+
+    {
+      products.length > 0 ? (
+        <div class="product-grid">
+          {products.map((p, i) => (
+            <ProductCard product={p} priority={i < 4} />
+          ))}
+        </div>
+      ) : (
+        <p class="empty">Nessun prodotto in questa categoria per ora.</p>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<script>
+  document.querySelectorAll<HTMLFormElement>('form[data-autosubmit]').forEach((form) => {
+    form.addEventListener('change', () => form.requestSubmit())
+  })
+</script>
+
+<style>
+  .shop {
+    padding-top: clamp(2rem, 6vw, 4rem);
+  }
+
+  .shop__head {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .shop__controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .filters a {
+    display: inline-block;
+    padding: 0.45em 1.1em;
+    border: 1px solid var(--grey-700);
+    border-radius: var(--radius-pill);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--grey-300);
+  }
+
+  .filters a:hover {
+    border-color: var(--white);
+    color: var(--white);
+  }
+
+  .filters a[aria-current='page'] {
+    background: var(--white);
+    border-color: var(--white);
+    color: var(--black);
+  }
+
+  .sort select {
+    min-height: 40px;
+    padding: 0.4em 2.2em 0.4em 1.1em;
+    border: 1px solid var(--grey-700);
+    border-radius: var(--radius-pill);
+    background: var(--black)
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none' stroke='%23fff'%3E%3Cpath d='M1 1l4 4 4-4'/%3E%3C/svg%3E")
+      no-repeat right 1em center;
+    color: var(--white);
+    font: inherit;
+    font-size: 0.8125rem;
+    appearance: none;
+    cursor: pointer;
+  }
+
+  .empty {
+    color: var(--grey-300);
+    padding-block: 4rem;
+  }
+</style>

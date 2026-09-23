@@ -1,0 +1,35 @@
+{
+  "name": "frenz-jewelz",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "check": "astro check",
+    "deploy": "astro build && wrangler deploy",
+    "studio": "npm --prefix sanity run dev"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^14.3.3",
+    "@sanity/client": "^8.6.2",
+    "@sanity/image-url": "^2.1.1",
+    "astro": "^7.3.4",
+    "astro-portabletext": "^1.0.1",
+    "groq": "^6.16.0"
+  },
+  "allowScripts": {
+    "esbuild": true
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@portabletext/types": "^4.0.2",
+    "@types/node": "^22.20.4",
+    "typescript": "^6.0.3",
+    "wrangler": "^4.137.0"
+  }
+}

@@ -1,0 +1,35 @@
+---
+import {urlFor} from '../lib/sanity'
+import type {SanityImage} from '../lib/types'
+
+interface Props {
+  image: SanityImage
+  /** Rapporto larghezza/altezza del ritaglio (es. 4/5). */
+  aspect: number
+  /** Attributo sizes: quanto è larga l'immagine nel layout. */
+  sizes: string
+  widths?: number[]
+  /** true per le immagini sopra la piega (hero, cover prodotto). */
+  priority?: boolean
+  class?: string
+}
+
+const {image, aspect, sizes, widths = [320, 480, 640, 800, 1080, 1400, 1800], priority = false, class: className} = Astro.props
+
+const src = (w: number) => urlFor(image).width(w).height(Math.round(w / aspect)).quality(80).url()
+const srcset = widths.map((w) => `${src(w)} ${w}w`).join(', ')
+const base = widths[Math.min(3, widths.length - 1)]
+---
+
+<img
+  src={src(base)}
+  srcset={srcset}
+  sizes={sizes}
+  width={base}
+  height={Math.round(base / aspect)}
+  alt={image.alt ?? ''}
+  loading={priority ? 'eager' : 'lazy'}
+  fetchpriority={priority ? 'high' : 'auto'}
+  decoding={priority ? 'sync' : 'async'}
+  class={className}
+/>

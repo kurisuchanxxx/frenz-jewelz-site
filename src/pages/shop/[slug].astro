@@ -1,0 +1,291 @@
+---
+import {PortableText} from 'astro-portabletext'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import SanityImage from '../../components/SanityImage.astro'
+import {sanity, urlFor} from '../../lib/sanity'
+import {PRODUCT_QUERY} from '../../lib/queries'
+import {formatPrice} from '../../lib/money'
+import {getAvailability, isPurchasable, maxQuantity} from '../../lib/availability'
+import type {Product} from '../../lib/types'
+
+const product = await sanity.fetch<Product | null>(PRODUCT_QUERY, {slug: Astro.params.slug})
+if (!product) return Astro.rewrite('/404')
+
+const availability = getAvailability(product)
+const purchasable = isPurchasable(availability)
+const AVAILABILITY_LABEL = {
+  disponibile: product.productionType === 'pezzoUnico' ? 'Pezzo unico, disponibile' : 'Disponibile',
+  suOrdinazione: `Su ordinazione${product.leadTimeDays ? `, pronto in circa ${product.leadTimeDays} giorni` : ''}`,
+  esaurito: 'Esaurito',
+  nonInVendita: 'Non disponibile',
+}
+
+const details = [
+  ['Materiale', product.material],
+  ['Dimensioni', product.details?.dimensions],
+  ['Lunghezza catena', product.details?.chainLength],
+  ['Peso', product.details?.weight],
+  ['Finitura', product.details?.finish],
+].filter((row): row is [string, string] => Boolean(row[1]))
+
+const gallery = [...(product.images ?? []), ...(product.lifestyleImages ?? [])]
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: product.title,
+  description: product.seo?.metaDescription ?? product.shortDescription,
+  image: product.images?.slice(0, 3).map((img) => urlFor(img).width(1200).url()),
+  material: product.material,
+  brand: {'@type': 'Brand', name: 'Frenz Jewelz'},
+  offers: {
+    '@type': 'Offer',
+    url: new URL(`/shop/${product.slug}`, Astro.site).href,
+    price: (product.price / 100).toFixed(2),
+    priceCurrency: 'EUR',
+    availability: {
+      disponibile: 'https://schema.org/InStock',
+      suOrdinazione: 'https://schema.org/PreOrder',
+      esaurito: 'https://schema.org/SoldOut',
+      nonInVendita: 'https://schema.org/Discontinued',
+    }[availability],
+  },
+}
+---
+
+<BaseLayout
+  title={product.seo?.metaTitle ?? product.title}
+  description={product.seo?.metaDescription ?? product.shortDescription}
+  ogImage={product.images?.[0]}
+>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} />
+
+  <div class="container product">
+    <!-- Galleria: diventa un'isola interattiva in fase 2 -->
+    <div class="gallery">
+      {
+        gallery.map((img, i) => (
+          <div class="gallery__item">
+            <SanityImage
+              image={img}
+              aspect={4 / 5}
+              sizes="(min-width: 900px) 55vw, 100vw"
+              priority={i === 0}
+            />
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="info">
+      <p class="eyebrow">
+        <a href={`/shop?categoria=${product.category?.slug ?? ''}`}>{product.category?.title}</a>
+        {product.collab && <> · <a href={`/collab#${product.collab.slug}`}>Collab {product.collab.artistName}</a></>}
+      </p>
+      <h1>{product.title}</h1>
+      <p class="price">
+        {product.compareAtPrice && <s>{formatPrice(product.compareAtPrice)}</s>}
+        {formatPrice(product.price)}
+        <span class="price__note">IVA inclusa</span>
+      </p>
+
+      <p class="availability" data-state={availability}>{AVAILABILITY_LABEL[availability]}</p>
+
+      {product.shortDescription && <p class="lead">{product.shortDescription}</p>}
+
+      <!-- Il carrello (isola) si aggancia a questi data-attribute in fase 3 -->
+      <button
+        type="button"
+        class="btn btn--solid add"
+        data-add-to-cart
+        data-product-id={product._id}
+        data-max-quantity={maxQuantity(product)}
+        disabled={!purchasable}
+      >
+        {purchasable ? 'Aggiungi al carrello' : AVAILABILITY_LABEL[availability]}
+      </button>
+
+      {
+        product.isPersonalizable && (
+          <p class="custom">
+            Vuoi una versione personalizzata? <a href="/su-misura">Richiedi un pezzo su misura</a>
+          </p>
+        )
+      }
+
+      {
+        product.description && (
+          <div class="description">
+            <PortableText value={product.description} />
+          </div>
+        )
+      }
+
+      {
+        details.length > 0 && (
+          <dl class="details">
+            {details.map(([label, value]) => (
+              <div>
+                <dt>{label}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))}
+          </dl>
+        )
+      }
+
+      <p class="links">
+        <a href="/spedizioni-resi">Spedizioni e resi</a> · <a href="/guida">Taglie e cura dell’argento</a>
+      </p>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .product {
+    display: grid;
+    gap: clamp(2rem, 5vw, 4rem);
+    padding-top: clamp(1.5rem, 4vw, 3rem);
+  }
+
+  @media (min-width: 900px) {
+    .product {
+      grid-template-columns: 1.2fr 1fr;
+      align-items: start;
+    }
+
+    .info {
+      position: sticky;
+      top: calc(var(--header-h) + 2rem);
+    }
+  }
+
+  .gallery {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  @media (max-width: 899px) {
+    .gallery {
+      grid-auto-flow: column;
+      grid-auto-columns: 88%;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      margin-inline: calc(var(--gutter) * -1);
+      padding-inline: var(--gutter);
+      scrollbar-width: none;
+    }
+
+    .gallery__item {
+      scroll-snap-align: center;
+    }
+  }
+
+  .gallery__item {
+    aspect-ratio: 4 / 5;
+    background: var(--card-bg);
+  }
+
+  .gallery__item :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .eyebrow a {
+    text-decoration: none;
+  }
+
+  .info h1 {
+    font-size: clamp(2.25rem, 5vw, 4rem);
+    margin: 0.5rem 0 1rem;
+  }
+
+  .price {
+    font-size: 1.375rem;
+    font-weight: 600;
+  }
+
+  .price s {
+    color: var(--grey-500);
+    font-weight: 400;
+    margin-right: 0.5em;
+  }
+
+  .price__note {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--grey-500);
+  }
+
+  .availability {
+    font-size: 0.875rem;
+    color: var(--grey-100);
+  }
+
+  .availability::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 0.5em;
+    border-radius: 50%;
+    background: var(--white);
+  }
+
+  .availability[data-state='esaurito']::before,
+  .availability[data-state='nonInVendita']::before {
+    background: transparent;
+    border: 1px solid var(--grey-500);
+  }
+
+  .lead {
+    color: var(--grey-100);
+    max-width: 50ch;
+  }
+
+  .add {
+    width: 100%;
+    margin-block: 0.5rem 1rem;
+  }
+
+  .custom {
+    font-size: 0.9375rem;
+    color: var(--grey-300);
+  }
+
+  .description {
+    max-width: 60ch;
+    color: var(--grey-100);
+    margin-top: 2rem;
+  }
+
+  .details {
+    margin: 2rem 0;
+    border-top: 1px solid var(--grey-900);
+  }
+
+  .details div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 0.75rem;
+    border-bottom: 1px solid var(--grey-900);
+    font-size: 0.9375rem;
+  }
+
+  .details dt {
+    color: var(--grey-300);
+  }
+
+  .details dd {
+    margin: 0;
+    text-align: right;
+  }
+
+  .links {
+    font-size: 0.875rem;
+    color: var(--grey-500);
+  }
+</style>

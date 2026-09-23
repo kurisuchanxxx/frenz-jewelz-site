@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "frenz-jewelz",
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
+  // Variabili non segrete. I segreti vanno con `npx wrangler secret put NOME` (vedi README).
+  "vars": {
+    "SANITY_DATASET": "production"
+  }
+}
