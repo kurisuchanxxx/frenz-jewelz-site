@@ -180,6 +180,59 @@ async function seedAboutFourthImage() {
   console.log('+ quarta foto About')
 }
 
+// Dati presi dal pannello Aruba (prezzi IVA inclusa, quantità). Ordine: come su Aruba, "più recenti".
+// Le descrizioni brevi sono BOZZE da rivedere con FRENZ: su Aruba non c'erano.
+const PRODUCTS = [
+  {title: 'TicTac', slug: 'tictac', price: 15000, stock: 0, short: 'Ciondolo lettering graffiti in argento 925, traforato a mano. Con catena.'},
+  {title: 'Nemico Pubblico', slug: 'nemico-pubblico', price: 10000, stock: 1, short: 'Ciondolo a due righe in argento 925, lettering graffiti traforato a mano. Con catena.'},
+  {title: 'Gothic S', slug: 'gothic-s', price: 7000, stock: 1, short: 'Lettera S in stile gotico, argento 925 traforato a mano. Con catena.'},
+  {title: 'Mizu', slug: 'mizu', price: 7500, stock: 1, short: 'Ideogramma 水 (acqua) in argento 925, traforato a mano. Con catena.'},
+  {title: 'Wu-Tang', slug: 'wu-tang', price: 7000, stock: 1, short: 'Simbolo W in argento 925, traforato a mano. Con catena.'},
+  {title: '2000', slug: '2000', price: 8000, stock: 1, short: 'Ciondolo 2000 in lettering graffiti, argento 925 traforato a mano. Con catena.'},
+  {title: 'Palestina', slug: 'palestina', price: 9000, stock: 1, short: 'Sagoma della Palestina in argento 925, traforata a mano. Con catena.'},
+  {title: 'Classico', slug: 'classico', price: 15000, stock: 0, short: 'Ciondolo Classico in lettering graffiti, argento 925 traforato a mano. Con catena.'},
+  {title: '2PAC', slug: '2pac', price: 6000, stock: 1, short: 'Ciondolo 2PAC in argento 925, traforato a mano. Con catena.'},
+  {title: 'Enemy', slug: 'enemy', price: 15000, stock: 1, short: 'Ciondolo Enemy in lettering graffiti, argento 925 traforato a mano. Con catena.'},
+  {title: '1312', slug: '1312', price: 6000, stock: 1, short: 'Ciondolo 1312 in lettering graffiti, argento 925 traforato a mano. Con catena.'},
+]
+
+async function seedProducts(categoryIds: Record<string, string>) {
+  let featuredLeft = 4
+  for (const [i, p] of PRODUCTS.entries()) {
+    const exists = await client.fetch<boolean>(
+      `defined(*[_type == "product" && slug.current == $slug][0]._id)`,
+      {slug: p.slug},
+    )
+    const featured = p.stock > 0 && featuredLeft > 0
+    if (featured) featuredLeft--
+    if (exists) continue
+    await client.create({
+      _type: 'product',
+      title: p.title,
+      slug: {_type: 'slug', current: p.slug},
+      category: {_type: 'reference', _ref: categoryIds.collane},
+      price: p.price,
+      productionType: 'piccolaSerie',
+      stock: p.stock,
+      isAvailable: true,
+      isPersonalizable: true,
+      featured,
+      sortOrder: (i + 1) * 10,
+      material: 'Argento 925',
+      shortDescription: p.short,
+      images: [
+        {
+          _key: 'cover',
+          _type: 'imageWithAlt',
+          asset: await uploadImage(`products/${p.slug}.webp`),
+          alt: `Ciondolo ${p.title} in argento 925 con catena`,
+        },
+      ],
+    })
+    console.log(`+ prodotto ${p.title}`)
+  }
+}
+
 async function seedTestProduct(categoryIds: Record<string, string>) {
   const exists = await client.fetch<boolean>(
     `defined(*[_type == "product" && slug.current == "prodotto-di-test"][0]._id)`,
@@ -195,7 +248,7 @@ async function seedTestProduct(categoryIds: Record<string, string>) {
     stock: 1,
     isAvailable: true,
     isPersonalizable: true,
-    featured: true,
+    featured: false,
     sortOrder: 999,
     material: 'Argento 925',
     shortDescription: 'Prodotto di prova per verificare shop e checkout. Da eliminare prima del go-live.',
@@ -216,5 +269,6 @@ await seedSettings()
 await seedAboutPage()
 await seedAboutFourthImage()
 await seedCollabs()
+await seedProducts(categoryIds)
 await seedTestProduct(categoryIds)
 console.log('Seed completato.')
