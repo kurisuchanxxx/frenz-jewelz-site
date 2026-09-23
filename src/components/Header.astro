@@ -35,12 +35,12 @@ const isActive = (href: string) => path === href || path.startsWith(`${href}/`)
       </ul>
     </nav>
 
-    <!-- Carrello: diventa un'isola interattiva (drawer) in fase 3 -->
-    <a href="/shop" class="cart-link" aria-label="Carrello">
+    <a href="/shop" class="cart-link" aria-label="Carrello" data-cart-open>
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
         <path d="M6 7h12l-1 13H7L6 7Z"></path>
         <path d="M9 7a3 3 0 0 1 6 0"></path>
       </svg>
+      <span class="cart-link__count" data-cart-count hidden></span>
     </a>
   </div>
 </header>
@@ -108,10 +108,27 @@ const isActive = (href: string) => path === href || path.startsWith(`${href}/`)
   }
 
   .cart-link {
+    position: relative;
     display: grid;
     place-items: center;
     width: 44px;
     height: 44px;
+  }
+
+  .cart-link__count {
+    position: absolute;
+    top: 4px;
+    right: 2px;
+    min-width: 18px;
+    height: 18px;
+    padding-inline: 5px;
+    border-radius: var(--radius-pill);
+    background: var(--white);
+    color: var(--black);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
   }
 
   @media (max-width: 640px) {

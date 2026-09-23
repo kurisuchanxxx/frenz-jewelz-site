@@ -1,0 +1,355 @@
+---
+// Drawer laterale del carrello. Montato una volta nel layout; il contenuto è
+// renderizzato dal client a partire da localStorage.
+---
+
+<div class="drawer" id="cart-drawer" hidden>
+  <div class="drawer__backdrop" data-cart-close></div>
+  <aside class="drawer__panel" role="dialog" aria-modal="true" aria-labelledby="cart-title" tabindex="-1">
+    <header class="drawer__head">
+      <h2 id="cart-title">Carrello</h2>
+      <button type="button" class="drawer__close" data-cart-close aria-label="Chiudi carrello">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18"></path>
+        </svg>
+      </button>
+    </header>
+
+    <p class="drawer__error" data-cart-error role="alert" hidden></p>
+    <ul class="drawer__items" data-cart-items></ul>
+
+    <p class="drawer__empty" data-cart-empty>
+      Il carrello è vuoto.<br />
+      <a href="/shop">Vai allo shop</a>
+    </p>
+
+    <footer class="drawer__foot" data-cart-foot hidden>
+      <div class="drawer__row">
+        <span>Subtotale</span>
+        <strong data-cart-subtotal></strong>
+      </div>
+      <p class="drawer__note">Spedizione calcolata al checkout. IVA inclusa.</p>
+      <button type="button" class="btn btn--solid drawer__checkout" data-cart-checkout>Vai al checkout</button>
+      <p class="drawer__legal">
+        Procedendo accetti i <a href="/termini">termini e condizioni</a>.
+      </p>
+    </footer>
+  </aside>
+</div>
+
+<template id="cart-item-template">
+  <li class="item">
+    <a class="item__media" data-link><img alt="" width="72" height="90" data-image /></a>
+    <div class="item__body">
+      <a class="item__title" data-link data-title></a>
+      <span class="item__price" data-price></span>
+      <div class="item__qty">
+        <button type="button" data-dec aria-label="Diminuisci quantità">−</button>
+        <span data-qty></span>
+        <button type="button" data-inc aria-label="Aumenta quantità">+</button>
+        <button type="button" class="item__remove" data-remove>Rimuovi</button>
+      </div>
+    </div>
+  </li>
+</template>
+
+<script>
+  import {cart, formatPrice, type CartItem} from '../lib/cart'
+
+  const drawer = document.getElementById('cart-drawer')!
+  const panel = drawer.querySelector<HTMLElement>('.drawer__panel')!
+  const list = drawer.querySelector<HTMLElement>('[data-cart-items]')!
+  const empty = drawer.querySelector<HTMLElement>('[data-cart-empty]')!
+  const foot = drawer.querySelector<HTMLElement>('[data-cart-foot]')!
+  const subtotal = drawer.querySelector<HTMLElement>('[data-cart-subtotal]')!
+  const error = drawer.querySelector<HTMLElement>('[data-cart-error]')!
+  const checkout = drawer.querySelector<HTMLButtonElement>('[data-cart-checkout]')!
+  const template = document.getElementById('cart-item-template') as HTMLTemplateElement
+
+  let lastFocus: HTMLElement | null = null
+
+  function render(items: CartItem[] = cart.get()) {
+    list.replaceChildren(
+      ...items.map((item) => {
+        const node = template.content.firstElementChild!.cloneNode(true) as HTMLElement
+        const img = node.querySelector<HTMLImageElement>('[data-image]')!
+        if (item.image) img.src = item.image
+        else img.remove()
+        node.querySelectorAll<HTMLAnchorElement>('[data-link]').forEach((a) => (a.href = `/shop/${item.slug}`))
+        node.querySelector('[data-title]')!.textContent = item.title
+        node.querySelector('[data-price]')!.textContent = formatPrice(item.price * item.qty)
+        node.querySelector('[data-qty]')!.textContent = String(item.qty)
+        const inc = node.querySelector<HTMLButtonElement>('[data-inc]')!
+        inc.disabled = item.qty >= item.max
+        inc.addEventListener('click', () => cart.setQty(item.id, item.qty + 1))
+        node.querySelector('[data-dec]')!.addEventListener('click', () => cart.setQty(item.id, item.qty - 1))
+        node.querySelector('[data-remove]')!.addEventListener('click', () => cart.remove(item.id))
+        return node
+      }),
+    )
+    const has = items.length > 0
+    empty.hidden = has
+    foot.hidden = !has
+    subtotal.textContent = formatPrice(cart.subtotal())
+    document.querySelectorAll<HTMLElement>('[data-cart-count]').forEach((el) => {
+      const n = cart.count()
+      el.textContent = n ? String(n) : ''
+      el.hidden = n === 0
+    })
+  }
+
+  function open() {
+    lastFocus = document.activeElement as HTMLElement
+    drawer.hidden = false
+    document.body.style.overflow = 'hidden'
+    requestAnimationFrame(() => {
+      drawer.dataset.open = 'true'
+      panel.focus()
+    })
+  }
+
+  function close() {
+    delete drawer.dataset.open
+    document.body.style.overflow = ''
+    setTimeout(() => (drawer.hidden = true), 250)
+    lastFocus?.focus()
+  }
+
+  drawer.querySelectorAll('[data-cart-close]').forEach((el) => el.addEventListener('click', close))
+  document.addEventListener('keydown', (e) => e.key === 'Escape' && !drawer.hidden && close())
+  document.querySelectorAll('[data-cart-open]').forEach((el) =>
+    el.addEventListener('click', (e) => {
+      e.preventDefault()
+      open()
+    }),
+  )
+
+  // Bottone "Aggiungi al carrello" delle pagine prodotto
+  document.querySelectorAll<HTMLButtonElement>('[data-add-to-cart]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const d = btn.dataset
+      cart.add({
+        id: d.productId!,
+        slug: d.productSlug!,
+        title: d.productTitle!,
+        price: Number(d.productPrice),
+        image: d.productImage,
+        max: Number(d.maxQuantity) || 1,
+      })
+      open()
+    })
+  })
+
+  checkout.addEventListener('click', async () => {
+    checkout.disabled = true
+    checkout.textContent = 'Un attimo…'
+    error.hidden = true
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({items: cart.get().map(({id, qty}) => ({id, quantity: qty}))}),
+      })
+      const data = (await res.json()) as {url?: string; error?: string; unavailable?: string[]}
+      if (res.ok && data.url) {
+        location.href = data.url
+        return
+      }
+      // Prodotti non più disponibili: li togliamo e spieghiamo
+      data.unavailable?.forEach((id) => cart.remove(id))
+      error.textContent = data.error ?? 'Qualcosa è andato storto. Riprova.'
+      error.hidden = false
+    } catch {
+      error.textContent = 'Connessione assente. Riprova.'
+      error.hidden = false
+    } finally {
+      checkout.disabled = false
+      checkout.textContent = 'Vai al checkout'
+    }
+  })
+
+  cart.onChange(render)
+  render()
+</script>
+
+<style>
+  .drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+  }
+
+  .drawer__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgb(0 0 0 / 0.6);
+    opacity: 0;
+    transition: opacity 0.25s var(--ease);
+  }
+
+  .drawer__panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(440px, 100vw);
+    display: flex;
+    flex-direction: column;
+    background: var(--black);
+    border-left: 1px solid var(--grey-900);
+    transform: translateX(100%);
+    transition: transform 0.3s var(--ease);
+    outline: none;
+  }
+
+  .drawer[data-open='true'] .drawer__backdrop {
+    opacity: 1;
+  }
+
+  .drawer[data-open='true'] .drawer__panel {
+    transform: none;
+  }
+
+  .drawer__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem var(--gutter);
+    border-bottom: 1px solid var(--grey-900);
+  }
+
+  .drawer__head h2 {
+    font-size: 1.25rem;
+  }
+
+  .drawer__close {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    background: none;
+    border: 0;
+    color: var(--white);
+    cursor: pointer;
+  }
+
+  .drawer__items {
+    flex: 1;
+    overflow-y: auto;
+    list-style: none;
+    margin: 0;
+    padding: 0 var(--gutter);
+  }
+
+  .item {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    gap: 1rem;
+    padding-block: 1rem;
+    border-bottom: 1px solid var(--grey-900);
+  }
+
+  .item__media img {
+    width: 72px;
+    height: 90px;
+    object-fit: cover;
+    background: var(--card-bg);
+  }
+
+  .item__body {
+    display: grid;
+    align-content: start;
+    gap: 0.25rem;
+  }
+
+  .item__title {
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+  }
+
+  .item__price {
+    font-size: 0.9375rem;
+  }
+
+  .item__qty {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+  }
+
+  .item__qty button {
+    min-width: 32px;
+    height: 32px;
+    border: 1px solid var(--grey-700);
+    border-radius: var(--radius-pill);
+    background: none;
+    color: var(--white);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .item__qty button:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  .item__qty span {
+    min-width: 2ch;
+    text-align: center;
+  }
+
+  .item__remove {
+    margin-left: auto;
+    border: 0 !important;
+    font-size: 0.8125rem !important;
+    color: var(--grey-500) !important;
+    text-decoration: underline;
+  }
+
+  .drawer__empty {
+    padding: 3rem var(--gutter);
+    text-align: center;
+    color: var(--grey-300);
+  }
+
+  .drawer__foot {
+    padding: 1.25rem var(--gutter) calc(1.25rem + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--grey-900);
+  }
+
+  .drawer__row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.125rem;
+  }
+
+  .drawer__note,
+  .drawer__legal {
+    font-size: 0.8125rem;
+    color: var(--grey-500);
+    margin: 0.5rem 0 0;
+  }
+
+  .drawer__error {
+    margin: 1rem var(--gutter) 0;
+    font-size: 0.875rem;
+    color: var(--grey-100);
+    padding: 0.6em 0.9em;
+    border: 1px solid var(--grey-700);
+  }
+
+  .drawer__checkout {
+    width: 100%;
+    margin-top: 1rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .drawer__panel,
+    .drawer__backdrop {
+      transition: none;
+    }
+  }
+</style>

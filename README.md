@@ -68,6 +68,27 @@ Stessa cosa per `SANITY_API_WRITE_TOKEN`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_S
 
 I valori pubblici (`SANITY_PROJECT_ID`, `SANITY_DATASET`, `PUBLIC_SITE_URL`, `PUBLIC_TURNSTILE_SITE_KEY`) vengono letti **al build**: vanno nel `.env` locale o nelle variabili di build di Workers Builds, se il deploy parte da Git.
 
+## Stripe (checkout e webhook)
+
+Flusso: carrello in localStorage → `POST /api/checkout` ricalcola prezzi e stock da Sanity e crea una Checkout Session (30 min, indirizzo e telefono, opzioni di spedizione da *Impostazioni sito*) → Stripe → `/ordine/grazie` o `/ordine/annullato`. Il webhook `POST /api/stripe-webhook` su `checkout.session.completed` crea l'ordine in Sanity (`_id = order-<session>`, quindi mai duplicato), scala lo stock e manda le email. Se un pezzo era già finito, l'ordine nasce **da verificare** e FRENZ riceve un avviso.
+
+Setup, in modalità test:
+
+1. Dashboard Stripe → Sviluppatori → chiave segreta di test in `STRIPE_SECRET_KEY`.
+2. **Impostazioni → Dettagli pubblici → URL termini di servizio**: `https://frenzjewelz.it/termini`. Senza questo, Stripe rifiuta la sessione (chiediamo l'accettazione dei termini al checkout).
+3. Webhook in locale, con la Stripe CLI:
+
+```bash
+stripe listen --forward-to localhost:4321/api/stripe-webhook
+```
+
+Il comando stampa un `whsec_…`: va in `STRIPE_WEBHOOK_SECRET`. In produzione si crea un endpoint su Dashboard → Webhook con l'evento `checkout.session.completed` e si usa il suo secret.
+
+4. Token Sanity *Editor* in `SANITY_API_WRITE_TOKEN` (il webhook scrive ordini e stock).
+5. Resend: verificare il dominio `frenzjewelz.it` (DNS) e mettere la chiave in `RESEND_API_KEY`; `ORDER_NOTIFICATION_EMAIL` è l'indirizzo di FRENZ. Il mittente è in `src/lib/email.ts`.
+
+Test: carta `4242 4242 4242 4242`, qualsiasi data futura e CVC. Dopo il pagamento: ordine in Studio → Ordini → Da gestire, stock scalato, due email. Rilanciando lo stesso evento (`stripe events resend <id>`) l'ordine non si duplica.
+
 ## Variabili d'ambiente
 
 | Nome | Dove | A cosa serve |
@@ -97,6 +118,6 @@ Lo stock scala da solo a ogni ordine. Per togliere un prodotto dalla vendita sen
 
 - [x] **Fase 1, fondamenta**: progetto Sanity `d2cmi1jx` (org Ctrl Studio, dataset privato), seed caricato, prodotto di test visibile in `/shop` in locale. Da fare: `sanity deploy` dello Studio.
 - [ ] Fase 2, catalogo
-- [ ] Fase 3, checkout
+- [~] **Fase 3, checkout**: codice completo (carrello, `/api/checkout`, webhook, email, pagine di ritorno). Da testare con chiavi Stripe di test.
 - [ ] Fase 4, form e legali
 - [ ] Fase 5, go-live

@@ -21,6 +21,7 @@ export default defineConfig({
   trailingSlash: 'never',
   env: {
     schema: {
+      PUBLIC_SITE_URL: envField.string({context: 'client', access: 'public', optional: true}),
       SANITY_PROJECT_ID: envField.string({context: 'server', access: 'public'}),
       SANITY_DATASET: envField.string({context: 'server', access: 'public', default: 'production'}),
       SANITY_API_READ_TOKEN: envField.string({context: 'server', access: 'secret'}),

@@ -93,12 +93,16 @@ const jsonLd = {
 
       {product.shortDescription && <p class="lead">{product.shortDescription}</p>}
 
-      <!-- Il carrello (isola) si aggancia a questi data-attribute in fase 3 -->
+      <!-- Il drawer del carrello (src/islands/CartDrawer.astro) legge questi data-attribute -->
       <button
         type="button"
         class="btn btn--solid add"
         data-add-to-cart
         data-product-id={product._id}
+        data-product-slug={product.slug}
+        data-product-title={product.title}
+        data-product-price={product.price}
+        data-product-image={product.images?.[0] ? urlFor(product.images[0]).width(144).height(180).url() : undefined}
         data-max-quantity={maxQuantity(product)}
         disabled={!purchasable}
       >

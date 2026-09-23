@@ -1,0 +1,38 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+---
+
+<BaseLayout title="Pagamento annullato" noindex>
+  <section class="container cancelled">
+    <p class="eyebrow">Pagamento annullato</p>
+    <h1>Nessun addebito.</h1>
+    <p>Il carrello è ancora qui, se vuoi riprovare. Se qualcosa non ha funzionato, scrivici e sistemiamo.</p>
+    <div class="actions">
+      <a href="/shop" class="btn btn--solid" data-cart-open>Riapri il carrello</a>
+      <a href="/shop" class="btn">Torna allo shop</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .cancelled {
+    max-width: 640px;
+    padding-block: clamp(4rem, 12vw, 10rem);
+  }
+
+  .cancelled h1 {
+    margin: 0.5rem 0 1.5rem;
+  }
+
+  .cancelled p {
+    color: var(--grey-100);
+    font-size: 1.125rem;
+    margin-bottom: 2rem;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+</style>

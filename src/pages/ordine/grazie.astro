@@ -1,0 +1,59 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import {getStripe} from '../../lib/stripe'
+import {formatPrice} from '../../lib/money'
+
+// Ritorno da Stripe. La sessione serve solo per mostrare il riepilogo:
+// l'ordine vero lo scrive il webhook.
+const sessionId = Astro.url.searchParams.get('session_id')
+let summary: {email?: string; total?: number; paid: boolean} | null = null
+if (sessionId) {
+  try {
+    const s = await getStripe().checkout.sessions.retrieve(sessionId)
+    summary = {email: s.customer_details?.email ?? undefined, total: s.amount_total ?? undefined, paid: s.payment_status === 'paid'}
+  } catch {
+    summary = null
+  }
+}
+---
+
+<BaseLayout title="Ordine completato" noindex>
+  <section class="container thanks">
+    <p class="eyebrow">Ordine completato</p>
+    <h1>Grazie.</h1>
+    {
+      summary?.paid ? (
+        <p>
+          Pagamento ricevuto{summary.total ? `: ${formatPrice(summary.total)}` : ''}.
+          {summary.email && <> Ti abbiamo mandato la conferma a <strong>{summary.email}</strong>.</>}
+          Ti scriviamo di nuovo quando il pacco parte, con il tracking.
+        </p>
+      ) : (
+        <p>Stiamo registrando il tuo ordine. Se non ricevi la conferma via email entro qualche minuto, scrivici.</p>
+      )
+    }
+    <a href="/shop" class="btn">Torna allo shop</a>
+  </section>
+</BaseLayout>
+
+<script>
+  import {cart} from '../../lib/cart'
+  cart.clear()
+</script>
+
+<style>
+  .thanks {
+    max-width: 640px;
+    padding-block: clamp(4rem, 12vw, 10rem);
+  }
+
+  .thanks h1 {
+    margin: 0.5rem 0 1.5rem;
+  }
+
+  .thanks p {
+    color: var(--grey-100);
+    font-size: 1.125rem;
+    margin-bottom: 2rem;
+  }
+</style>

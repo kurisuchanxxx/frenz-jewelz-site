@@ -20,7 +20,8 @@
     "@sanity/image-url": "^2.1.1",
     "astro": "^7.3.4",
     "astro-portabletext": "^1.0.1",
-    "groq": "^6.16.0"
+    "groq": "^6.16.0",
+    "stripe": "^22.6.2"
   },
   "allowScripts": {
     "esbuild": true
