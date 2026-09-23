@@ -42,13 +42,33 @@ export interface Product extends ProductCard {
   seo?: {metaTitle?: string; metaDescription?: string}
 }
 
+export interface Collaboration {
+  _id: string
+  artistName: string
+  slug: string
+  portrait: SanityImage
+  description?: PortableTextBlock[]
+  instagramUrl?: string
+  pieces?: ProductCard[]
+}
+
 export interface SiteSettings {
-  heroImage?: SanityImage
+  heroImages?: SanityImage[]
   heroHeadline?: string
   heroSubline?: string
+  collabHeadline?: string
+  collabSubline?: string
   lookbookImages?: SanityImage[]
   announcementBar?: string
   instagramUrl?: string
   facebookUrl?: string
   contactEmail?: string
+}
+
+export interface Page {
+  title: string
+  slug: string
+  body?: PortableTextBlock[]
+  images?: SanityImage[]
+  seo?: {metaTitle?: string; metaDescription?: string}
 }

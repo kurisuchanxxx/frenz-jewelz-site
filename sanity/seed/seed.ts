@@ -48,22 +48,99 @@ async function seedCategories() {
   return ids
 }
 
+const img = async (file: string, alt: string, key: string) => ({
+  _key: key,
+  _type: 'imageWithAlt' as const,
+  asset: await uploadImage(file),
+  alt,
+})
+
 async function seedSettings() {
-  const exists = await client.fetch<boolean>(`defined(*[_id == "siteSettings"][0]._id)`)
-  if (exists) return
-  await client.createIfNotExists({
-    _id: 'siteSettings',
-    _type: 'siteSettings',
-    heroImage: {_type: 'imageWithAlt', asset: await uploadImage('hero.webp'), alt: 'Ragazzo con anello e collana FRENZ in argento'},
-    heroHeadline: 'Argento fatto a mano ad Ancona',
-    heroSubline: 'Pezzi unici e piccole serie in argento 925.',
+  const heroImages = await Promise.all([
+    img('DSC_0151.webp', 'Mani che tendono una catena FRENZ in argento', 'h1'),
+    img('DSC_0134.webp', 'Ragazzo mostra anello e collana FRENZ', 'h2'),
+    img('DSC_0113.webp', 'Pugno con anello FRENZ in argento', 'h3'),
+    img('DSC_0255.webp', 'Catena FRENZ stretta tra i denti', 'h4'),
+    img('DSC_0167.webp', 'Ciondolo FRENZ tenuto con due mani', 'h5'),
+    img('DSC_0119.webp', 'Pugno con anello davanti a un muro graffitato', 'h6'),
+    img('DSC_0158.webp', 'Bracciale e anello FRENZ indossati', 'h7'),
+  ])
+  const lookbookImages = await Promise.all([
+    img('DSC_0292.webp', 'Ciondolo in argento su petto tatuato', 'l1'),
+    img('DSC_0199.webp', 'Mano con anelli sul viso', 'l2'),
+    img('DSC_0030.webp', 'Bracciale 1312 al polso', 'l3'),
+    img('DSC_0313.webp', 'Collana Classico in argento', 'l4'),
+    img('DSC_0215.webp', 'Pugno con bracciale e collana', 'l5'),
+    img('DSC_0317.webp', 'Ciondolo in argento su collana sottile', 'l6'),
+  ])
+  const defaults = {
+    heroImages,
+    lookbookImages,
+    heroHeadline: 'Pezzi creati per chi la strada la vive davvero',
+    heroSubline: 'Argento 925. Lavorato a mano, ad Ancona.',
+    collabHeadline: 'Collaborazioni',
+    collabSubline: 'Pezzi unici per artisti, creator e persone che vivono la strada davvero.',
     // DA CONFERMARE con FRENZ: corriere, prezzi e tempi (domanda aperta 2).
     shippingOptions: [
       {_key: 'standard', _type: 'shippingOption', label: 'Spedizione Italia', price: 690, minDays: 2, maxDays: 4},
     ],
     instagramUrl: 'https://www.instagram.com/',
-  })
+  }
+  // Se esiste già, riempie solo i campi vuoti: le modifiche fatte in Studio restano.
+  await client
+    .transaction()
+    .createIfNotExists({_id: 'siteSettings', _type: 'siteSettings'})
+    .patch('siteSettings', (p) => p.setIfMissing(defaults).unset(['heroImage']))
+    .commit()
   console.log('+ impostazioni sito')
+}
+
+const paragraph = (text: string, key: string) => ({
+  _type: 'block',
+  _key: key,
+  style: 'normal',
+  markDefs: [],
+  children: [{_type: 'span', _key: `${key}s`, text, marks: []}],
+})
+
+async function seedAboutPage() {
+  const exists = await client.fetch<boolean>(`defined(*[_type == "page" && slug.current == "about"][0]._id)`)
+  if (exists) return
+  await client.create({
+    _type: 'page',
+    title: 'About',
+    slug: {_type: 'slug', current: 'about'},
+    // Testo del sito attuale, spezzato in paragrafi brevi.
+    body: [
+      paragraph(
+        'FRENZ è un orafo italiano con base ad Ancona. Il suo lavoro nasce nel punto in cui la disciplina della gioielleria incontra il linguaggio urbano.',
+        'p1',
+      ),
+      paragraph(
+        'Dopo la formazione a Chiaravalle e il perfezionamento a Valenza, capitale europea dell’oreficeria, sviluppa una ricerca personale sul traforo, sull’argento e sulla costruzione di pezzi unici.',
+        'p2',
+      ),
+      paragraph(
+        'Ogni gioiello prende forma dalla materia grezza: fusione, taglio, modellazione, finitura. Un processo fisico, diretto, senza scorciatoie.',
+        'p3',
+      ),
+      paragraph(
+        'Tradizione orafa e stile underground si incontrano in pezzi in argento 925, realizzati a mano e pensati per essere indossati, vissuti, riconosciuti.',
+        'p4',
+      ),
+      paragraph(
+        'Dalle commissioni private alle collaborazioni con artisti della scena rap e hip hop, il pezzo resta sempre al centro.',
+        'p5',
+      ),
+    ],
+    images: await Promise.all([
+      img('DSC_0199.webp', 'FRENZ con la mano sul viso, anelli in argento', 'a1'),
+      img('DSC_0119.webp', 'Pugno con anello FRENZ davanti a un muro graffitato', 'a2'),
+      img('DSC_0151.webp', 'Mani che tendono una catena FRENZ', 'a3'),
+    ]),
+    seo: {metaDescription: 'FRENZ è un orafo di Ancona: gioielli in argento 925 fatti a mano, tra tradizione orafa e cultura urbana.'},
+  })
+  console.log('+ pagina About')
 }
 
 async function seedTestProduct(categoryIds: Record<string, string>) {
@@ -99,5 +176,6 @@ async function seedTestProduct(categoryIds: Record<string, string>) {
 
 const categoryIds = await seedCategories()
 await seedSettings()
+await seedAboutPage()
 await seedTestProduct(categoryIds)
 console.log('Seed completato.')

@@ -1,31 +1,53 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
+import HeroSlideshow from '../components/HeroSlideshow.astro'
+import CollabCard from '../components/CollabCard.astro'
 import ProductCard from '../components/ProductCard.astro'
 import SanityImage from '../components/SanityImage.astro'
 import {sanity} from '../lib/sanity'
-import {FEATURED_PRODUCTS_QUERY, SETTINGS_QUERY} from '../lib/queries'
-import type {ProductCard as Card, SiteSettings} from '../lib/types'
+import {COLLABORATIONS_QUERY, FEATURED_PRODUCTS_QUERY, SETTINGS_QUERY} from '../lib/queries'
+import type {Collaboration, ProductCard as Card, SiteSettings} from '../lib/types'
 
-// Fase 1: hero + prodotti in evidenza. Lookbook e collab arrivano in fase 2.
-const [settings, featured] = await Promise.all([
+// Struttura come il sito originale: slideshow senza testo, headline, lookbook 3 colonne,
+// collab, CTA su misura. In più i prodotti in evidenza, se FRENZ ne segna qualcuno.
+const [settings, collabs, featured] = await Promise.all([
   sanity.fetch<SiteSettings | null>(SETTINGS_QUERY),
+  sanity.fetch<Collaboration[]>(COLLABORATIONS_QUERY),
   sanity.fetch<Card[]>(FEATURED_PRODUCTS_QUERY),
 ])
+
+const heroImages = settings?.heroImages ?? []
+const lookbook = settings?.lookbookImages ?? []
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Frenz Jewelz',
+  url: Astro.site?.href,
+  address: {'@type': 'PostalAddress', addressLocality: 'Ancona', addressCountry: 'IT'},
+  sameAs: [settings?.instagramUrl, settings?.facebookUrl].filter(Boolean),
+}
 ---
 
 <BaseLayout>
-  <section class="hero">
-    {
-      settings?.heroImage && (
-        <SanityImage image={settings.heroImage} aspect={16 / 9} sizes="100vw" priority class="hero__img" />
-      )
-    }
-    <div class="container hero__text">
-      <h1>{settings?.heroHeadline ?? 'Frenz Jewelz'}</h1>
-      {settings?.heroSubline && <p>{settings.heroSubline}</p>}
-      <a href="/shop" class="btn btn--solid">Vai allo shop</a>
-    </div>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} />
+
+  {heroImages.length > 0 && <HeroSlideshow images={heroImages} />}
+
+  <section class="container intro">
+    <h1>{settings?.heroHeadline ?? 'Pezzi creati per chi la strada la vive davvero'}</h1>
+    <p>{settings?.heroSubline ?? 'Argento 925. Lavorato a mano, ad Ancona.'}</p>
   </section>
+
+  {
+    lookbook.length > 0 && (
+      <section class="container lookbook" aria-label="Lookbook">
+        {lookbook.map((img, i) => (
+          <SanityImage image={img} aspect={1} sizes="(min-width: 640px) 33vw, 50vw" widths={[320, 480, 640, 800]} priority={i < 3} />
+        ))}
+      </section>
+    )
+  }
 
   {
     featured.length > 0 && (
@@ -36,58 +58,103 @@ const [settings, featured] = await Promise.all([
             <ProductCard product={p} />
           ))}
         </div>
+        <p class="center">
+          <a href="/shop" class="btn">Tutto lo shop</a>
+        </p>
       </section>
     )
   }
+
+  {
+    collabs.length > 0 && (
+      <section class="container collabs">
+        <h2>{settings?.collabHeadline ?? 'Collaborazioni'}</h2>
+        {settings?.collabSubline && <p class="collabs__sub">{settings.collabSubline}</p>}
+        <div class="collabs__grid">
+          {collabs.map((c) => (
+            <CollabCard collab={c} />
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  <section class="container cta">
+    <a href="/su-misura" class="btn">Get your piece</a>
+  </section>
 </BaseLayout>
 
 <style>
-  .hero {
-    position: relative;
-    min-height: min(85vh, 900px);
-    display: grid;
-    align-items: end;
-    overflow: hidden;
+  .intro {
+    text-align: center;
+    padding-block: clamp(3rem, 8vw, 6rem);
   }
 
-  .hero :global(.hero__img) {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: grayscale(1) contrast(1.1);
-  }
-
-  .hero::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgb(0 0 0 / 0.85), rgb(0 0 0 / 0) 60%);
-  }
-
-  .hero__text {
-    position: relative;
-    z-index: 1;
-    padding-block: clamp(2rem, 6vw, 5rem);
-  }
-
-  .hero__text h1 {
-    max-width: 12ch;
+  .intro h1 {
+    font-size: clamp(1.75rem, 4.5vw, 3.25rem);
+    max-width: 22ch;
+    margin-inline: auto;
     margin-bottom: 1rem;
   }
 
-  .hero__text p {
-    max-width: 40ch;
+  .intro p {
     color: var(--grey-100);
-    font-size: 1.125rem;
+    margin: 0;
   }
 
-  .featured {
-    padding-top: clamp(3rem, 8vw, 6rem);
+  .lookbook {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(0.5rem, 1.5vw, 1rem);
   }
 
-  .featured h2 {
+  .lookbook :global(img) {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    filter: grayscale(1);
+  }
+
+  @media (max-width: 480px) {
+    .lookbook {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .featured,
+  .collabs {
+    padding-top: clamp(4rem, 10vw, 7rem);
+    text-align: center;
+  }
+
+  .featured h2,
+  .collabs h2 {
+    margin-bottom: 0.75rem;
+  }
+
+  .featured .product-grid {
+    margin-top: 2rem;
+    text-align: left;
+  }
+
+  .center {
+    margin-top: 2rem;
+  }
+
+  .collabs__sub {
+    color: var(--grey-100);
     margin-bottom: 2rem;
+  }
+
+  .collabs__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 320px));
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .cta {
+    text-align: center;
+    padding-top: 2rem;
   }
 </style>

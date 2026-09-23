@@ -1,0 +1,107 @@
+---
+import {PortableText} from 'astro-portabletext'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import SanityImage from '../components/SanityImage.astro'
+import ProductCard from '../components/ProductCard.astro'
+import {sanity} from '../lib/sanity'
+import {COLLABORATIONS_QUERY} from '../lib/queries'
+import type {Collaboration} from '../lib/types'
+
+const collabs = await sanity.fetch<Collaboration[]>(COLLABORATIONS_QUERY)
+---
+
+<BaseLayout title="Collab" description="Pezzi unici realizzati con artisti della scena rap e hip hop.">
+  <div class="container collab-page">
+    <h1>Collab</h1>
+    {collabs.length === 0 && <p class="prose">Le collaborazioni arrivano presto.</p>}
+    {
+      collabs.map((c) => (
+        <article id={c.slug} class="collab">
+          <div class="collab__portrait">
+            <SanityImage image={c.portrait} aspect={3 / 4} sizes="(min-width: 900px) 40vw, 100vw" widths={[480, 720, 960, 1200]} />
+          </div>
+          <div class="collab__body">
+            <h2>{c.artistName}</h2>
+            {c.description && (
+              <div class="prose">
+                <PortableText value={c.description} />
+              </div>
+            )}
+            {c.instagramUrl && (
+              <a href={c.instagramUrl} class="btn" rel="noopener" target="_blank">
+                Instagram
+              </a>
+            )}
+            {c.pieces && c.pieces.length > 0 && (
+              <div class="collab__pieces">
+                <p class="eyebrow">I pezzi</p>
+                <div class="product-grid product-grid--small">
+                  {c.pieces.map((p) => (
+                    <ProductCard product={p} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </article>
+      ))
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .collab-page {
+    padding-block: clamp(2rem, 6vw, 4rem);
+  }
+
+  .collab-page h1 {
+    margin-bottom: clamp(2rem, 5vw, 4rem);
+  }
+
+  .collab {
+    display: grid;
+    gap: 2rem;
+    padding-block: clamp(2rem, 5vw, 4rem);
+    border-top: 1px solid var(--grey-900);
+    scroll-margin-top: calc(var(--header-h) + 1rem);
+  }
+
+  @media (min-width: 900px) {
+    .collab {
+      grid-template-columns: 2fr 3fr;
+      gap: 4rem;
+    }
+  }
+
+  .collab__portrait :global(img) {
+    width: 100%;
+    filter: grayscale(1);
+  }
+
+  .collab__body h2 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    margin-bottom: 1.5rem;
+  }
+
+  .collab__body .btn {
+    margin-top: 1rem;
+  }
+
+  .collab__pieces {
+    margin-top: 3rem;
+  }
+
+  .collab__pieces .eyebrow {
+    margin-bottom: 1rem;
+  }
+
+  .product-grid--small {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 640px) {
+    .product-grid--small {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>

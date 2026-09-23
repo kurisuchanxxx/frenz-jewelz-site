@@ -1,4 +1,4 @@
-import {defineField, defineType} from 'sanity'
+import {defineArrayMember, defineField, defineType} from 'sanity'
 import {DocumentTextIcon} from '@sanity/icons/DocumentText'
 
 /** Pagine di testo: About, legali, spedizioni, guida. Lo slug deve combaciare con la route del sito. */
@@ -19,6 +19,14 @@ export const page = defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({name: 'body', title: 'Testo', type: 'blockContent'}),
+    defineField({
+      name: 'images',
+      title: 'Foto',
+      type: 'array',
+      description: 'Foto mostrate sotto il testo, una sotto l’altra (es. pagina About).',
+      of: [defineArrayMember({type: 'imageWithAlt'})],
+      options: {layout: 'grid'},
+    }),
     defineField({name: 'seo', title: 'SEO', type: 'seo'}),
   ],
   preview: {select: {title: 'title', subtitle: 'slug.current'}},

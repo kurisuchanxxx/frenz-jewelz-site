@@ -1,0 +1,62 @@
+---
+import {PortableText} from 'astro-portabletext'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import SanityImage from '../components/SanityImage.astro'
+import {sanity} from '../lib/sanity'
+import {PAGE_QUERY} from '../lib/queries'
+import type {Page} from '../lib/types'
+
+// Pagine di testo gestite da Studio. Solo questi slug, così un documento
+// con slug sbagliato non crea route a caso.
+const PAGE_SLUGS = ['about', 'spedizioni-resi', 'guida', 'termini', 'privacy', 'cookie']
+
+const slug = Astro.params.slug
+if (!slug || !PAGE_SLUGS.includes(slug)) return Astro.rewrite('/404')
+
+const page = await sanity.fetch<Page | null>(PAGE_QUERY, {slug})
+if (!page) return Astro.rewrite('/404')
+---
+
+<BaseLayout title={page.seo?.metaTitle ?? page.title} description={page.seo?.metaDescription} ogImage={page.images?.[0]}>
+  <article class="container page">
+    <h1>{page.title}</h1>
+    {
+      page.body && (
+        <div class="prose">
+          <PortableText value={page.body} />
+        </div>
+      )
+    }
+    {
+      page.images && page.images.length > 0 && (
+        <div class="page__images">
+          {page.images.map((img) => (
+            <SanityImage image={img} aspect={4 / 5} sizes="(min-width: 900px) 640px, 100vw" widths={[480, 640, 960, 1280]} />
+          ))}
+        </div>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<style>
+  .page {
+    max-width: 760px;
+    padding-block: clamp(2rem, 6vw, 4rem);
+  }
+
+  .page h1 {
+    margin-bottom: 2rem;
+  }
+
+  .page__images {
+    display: grid;
+    gap: 1rem;
+    margin-top: 3rem;
+  }
+
+  .page__images :global(img) {
+    width: 100%;
+    filter: grayscale(1);
+  }
+</style>

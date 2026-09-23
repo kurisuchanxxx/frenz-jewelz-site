@@ -18,7 +18,7 @@ const {title, description = 'Gioielli in argento 925 fatti a mano ad Ancona. Pez
 const settings = await sanity.fetch<SiteSettings | null>(SETTINGS_QUERY)
 const fullTitle = title ? `${title} | Frenz Jewelz` : 'Frenz Jewelz | Gioielli in argento fatti a mano'
 const canonical = new URL(Astro.url.pathname, Astro.site)
-const image = ogImage ?? settings?.heroImage
+const image = ogImage ?? settings?.heroImages?.[0]
 const ogImageUrl = image ? urlFor(image).width(1200).height(630).format('jpg').url() : undefined
 ---
 
