@@ -18,8 +18,7 @@ const isActive = (href: string) => path === href || path.startsWith(`${href}/`)
 <header class="header">
   <div class="container header__inner">
     <a href="/" class="logo" aria-label="Frenz Jewelz, home">
-      <!-- Placeholder: sostituire con il logo graffiti cromato (SVG/PNG in /public) -->
-      <span class="logo__text">FRENZ</span>
+      <img src="/logo.webp" alt="" width="783" height="346" class="logo__img" fetchpriority="high" />
     </a>
 
     <nav class="nav" aria-label="Principale">
@@ -79,15 +78,9 @@ const isActive = (href: string) => path === href || path.startsWith(`${href}/`)
     text-decoration: none;
   }
 
-  .logo__text {
-    font-family: var(--font-display);
-    font-weight: 900;
-    font-size: 1.75rem;
-    letter-spacing: -0.02em;
-    background: linear-gradient(180deg, #fff 0%, #9a9a9a 55%, #fff 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+  .logo__img {
+    height: 44px;
+    width: auto;
   }
 
   .nav ul {

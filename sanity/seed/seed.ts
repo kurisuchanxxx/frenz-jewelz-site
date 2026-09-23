@@ -143,6 +143,43 @@ async function seedAboutPage() {
   console.log('+ pagina About')
 }
 
+const COLLABS = [
+  {artistName: 'INOKI', slug: 'inoki', file: 'inoki.webp', alt: 'INOKI, ritratto', sortOrder: 10},
+  {artistName: 'ELE-A', slug: 'ele-a', file: 'ele-a.webp', alt: 'ELE-A, ritratto', sortOrder: 20},
+]
+
+async function seedCollabs() {
+  for (const c of COLLABS) {
+    const exists = await client.fetch<boolean>(
+      `defined(*[_type == "collaboration" && slug.current == $slug][0]._id)`,
+      {slug: c.slug},
+    )
+    if (exists) continue
+    await client.create({
+      _type: 'collaboration',
+      artistName: c.artistName,
+      slug: {_type: 'slug', current: c.slug},
+      portrait: {_type: 'imageWithAlt', asset: await uploadImage(c.file), alt: c.alt},
+      sortOrder: c.sortOrder,
+    })
+    console.log(`+ collab ${c.artistName}`)
+  }
+}
+
+async function seedAboutFourthImage() {
+  // La foto FRENZ + INOKI, quarta nell'About originale: aggiunta se manca.
+  const page = await client.fetch<{_id: string; keys: string[]} | null>(
+    `*[_type == "page" && slug.current == "about"][0]{_id, "keys": images[]._key}`,
+  )
+  if (!page || page.keys?.includes('a4')) return
+  await client
+    .patch(page._id)
+    .setIfMissing({images: []})
+    .append('images', [await img('about-inoki.webp', 'FRENZ e INOKI', 'a4')])
+    .commit()
+  console.log('+ quarta foto About')
+}
+
 async function seedTestProduct(categoryIds: Record<string, string>) {
   const exists = await client.fetch<boolean>(
     `defined(*[_type == "product" && slug.current == "prodotto-di-test"][0]._id)`,
@@ -177,5 +214,7 @@ async function seedTestProduct(categoryIds: Record<string, string>) {
 const categoryIds = await seedCategories()
 await seedSettings()
 await seedAboutPage()
+await seedAboutFourthImage()
+await seedCollabs()
 await seedTestProduct(categoryIds)
 console.log('Seed completato.')
