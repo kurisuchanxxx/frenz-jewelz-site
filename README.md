@@ -29,7 +29,7 @@ Requisiti: Node 22.12+.
 ```bash
 cd sanity
 npm install
-cp .env.example .env        # inserisci SANITY_STUDIO_PROJECT_ID
+cp .env.example .env        # SANITY_STUDIO_PROJECT_ID=d2cmi1jx
 npx sanity login
 npm run dev                 # Studio su http://localhost:3333
 npm run seed                # categorie, impostazioni, prodotto di test
@@ -95,7 +95,7 @@ Lo stock scala da solo a ogni ordine. Per togliere un prodotto dalla vendita sen
 
 ## Stato
 
-- [ ] **Fase 1, fondamenta**: codice pronto (adapter Cloudflare, schemi Sanity, layout, header, footer, `/shop`, pagina prodotto base, 404). Manca il progetto Sanity reale per il test end-to-end.
+- [x] **Fase 1, fondamenta**: progetto Sanity `d2cmi1jx` (org Ctrl Studio, dataset privato), seed caricato, prodotto di test visibile in `/shop` in locale. Da fare: `sanity deploy` dello Studio.
 - [ ] Fase 2, catalogo
 - [ ] Fase 3, checkout
 - [ ] Fase 4, form e legali
