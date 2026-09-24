@@ -1,0 +1,332 @@
+---
+import {PUBLIC_TURNSTILE_SITE_KEY} from 'astro:env/client'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import {BUDGET_RANGES, PIECE_TYPES} from '../lib/custom-request'
+
+const params = Astro.url.searchParams
+const sent = params.get('ok') === '1'
+const error = params.get('errore')
+---
+
+<BaseLayout
+  title="Su misura"
+  description="Gioielli su misura in argento 925, fatti a mano ad Ancona. Raccontami l’idea, il resto lo forgiamo insieme. Risposta entro 24 ore."
+>
+  <div class="container custom">
+    <header class="custom__intro">
+      <p class="eyebrow">Su misura</p>
+      <h1>Ogni pezzo nasce da un’idea.</h1>
+      <p class="lead">
+        Se hai in mente un gioiello su misura, scrivimi. Dimmi cosa rappresenta, il resto lo forgiamo insieme.
+        Risposta entro <strong>24 ore</strong>.
+      </p>
+      <p class="tagline">Pezzi unici. Lavorati a mano. In argento.</p>
+    </header>
+
+    <div class="custom__form" id="form">
+      {
+        sent ? (
+          <div class="notice notice--ok" role="status">
+            <h2>Ricevuto.</h2>
+            <p>Ti rispondo entro 24 ore all’indirizzo che hai lasciato. Controlla anche la posta indesiderata.</p>
+            <a href="/shop" class="btn">Intanto guarda lo shop</a>
+          </div>
+        ) : (
+          <form method="post" action="/api/custom-request" class="form" novalidate>
+            {error && (
+              <p class="notice notice--error" role="alert">
+                {error}
+              </p>
+            )}
+
+            <div class="form__row">
+              <label>
+                <span>Nome *</span>
+                <input type="text" name="name" required autocomplete="name" maxlength="100" />
+              </label>
+              <label>
+                <span>Email *</span>
+                <input type="email" name="email" required autocomplete="email" maxlength="200" />
+              </label>
+            </div>
+
+            <div class="form__row">
+              <label>
+                <span>Telefono</span>
+                <input type="tel" name="phone" autocomplete="tel" maxlength="40" />
+              </label>
+              <label>
+                <span>Tipo di pezzo *</span>
+                <select name="pieceType" required>
+                  <option value="">Scegli…</option>
+                  {PIECE_TYPES.map((p) => (
+                    <option value={p.value}>{p.label}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <fieldset class="form__budget">
+              <legend>Budget indicativo</legend>
+              <div class="pills">
+                {BUDGET_RANGES.map((b) => (
+                  <label class="pill">
+                    <input type="radio" name="budgetRange" value={b.value} />
+                    <span>{b.label}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
+            <label>
+              <span>Raccontami l’idea *</span>
+              <textarea name="message" rows="6" required minlength="10" maxlength="3000" placeholder="Cosa rappresenta, per chi è, che stile ti piace, misure se le sai…"></textarea>
+            </label>
+
+            <label>
+              <span>Riferimenti (link)</span>
+              <input type="text" name="references" placeholder="Link a foto, post Instagram, Pinterest… separati da uno spazio" />
+              <small>Oppure allega le foto rispondendo all’email di conferma.</small>
+            </label>
+
+            <label class="check">
+              <input type="checkbox" name="privacy" required />
+              <span>
+                Ho letto la <a href="/privacy">privacy policy</a> e acconsento al trattamento dei dati per ricevere una risposta. *
+              </span>
+            </label>
+
+            <p class="form__legal">
+              I pezzi su misura sono realizzati apposta per te: per legge non rientrano nel diritto di recesso.
+              Prima di iniziare ti mando un preventivo e concordiamo tutto per iscritto.
+            </p>
+
+            {/* Honeypot: invisibile, se compilato è un bot */}
+            <div class="hp" aria-hidden="true">
+              <label>
+                Sito web <input type="text" name="website" tabindex="-1" autocomplete="off" />
+              </label>
+            </div>
+
+            {PUBLIC_TURNSTILE_SITE_KEY && <div class="cf-turnstile" data-sitekey={PUBLIC_TURNSTILE_SITE_KEY} data-theme="dark" data-language="it" />}
+
+            <button type="submit" class="btn btn--solid form__submit">Invia la richiesta</button>
+          </form>
+        )
+      }
+    </div>
+  </div>
+
+  {PUBLIC_TURNSTILE_SITE_KEY && <script slot="head" src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer is:inline />}
+</BaseLayout>
+
+<style>
+  .custom {
+    display: grid;
+    gap: clamp(2rem, 5vw, 4rem);
+    padding-block: clamp(2rem, 6vw, 4rem);
+  }
+
+  @media (min-width: 900px) {
+    .custom {
+      grid-template-columns: 1fr 1.2fr;
+      align-items: start;
+    }
+
+    .custom__intro {
+      position: sticky;
+      top: calc(var(--header-h) + 2rem);
+    }
+  }
+
+  .custom__intro h1 {
+    font-size: clamp(2.25rem, 5vw, 4rem);
+    margin: 0.5rem 0 1.5rem;
+  }
+
+  .lead {
+    font-size: 1.125rem;
+    color: var(--grey-100);
+    max-width: 40ch;
+  }
+
+  .tagline {
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    color: var(--grey-300);
+  }
+
+  .form {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .form__row {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  @media (min-width: 640px) {
+    .form__row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .form label {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .form label > span:first-child,
+  .form legend {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--grey-300);
+  }
+
+  .form input:not([type='checkbox']):not([type='radio']),
+  .form select,
+  .form textarea {
+    width: 100%;
+    min-height: 48px;
+    padding: 0.7em 1em;
+    border: 1px solid var(--grey-700);
+    border-radius: 0;
+    background: var(--black);
+    color: var(--white);
+    font: inherit;
+  }
+
+  .form select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none' stroke='%23fff'%3E%3Cpath d='M1 1l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1em center;
+    padding-right: 2.5em;
+  }
+
+  .form textarea {
+    resize: vertical;
+  }
+
+  .form input:focus,
+  .form select:focus,
+  .form textarea:focus {
+    outline: none;
+    border-color: var(--white);
+  }
+
+  .form small {
+    font-size: 0.8125rem;
+    color: var(--grey-500);
+  }
+
+  .form__budget {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .pill {
+    display: inline-block !important;
+  }
+
+  .pill input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+  }
+
+  .pill span {
+    display: inline-block;
+    padding: 0.5em 1.1em;
+    border: 1px solid var(--grey-700);
+    border-radius: var(--radius-pill);
+    font-size: 0.875rem;
+    color: var(--grey-300);
+    cursor: pointer;
+    transition:
+      background 0.2s var(--ease),
+      color 0.2s var(--ease);
+  }
+
+  .pill input:checked + span {
+    background: var(--white);
+    border-color: var(--white);
+    color: var(--black);
+  }
+
+  .pill input:focus-visible + span {
+    outline: 2px solid var(--white);
+    outline-offset: 2px;
+  }
+
+  .check {
+    grid-template-columns: auto 1fr;
+    align-items: start;
+    gap: 0.75rem !important;
+    font-size: 0.9375rem;
+    color: var(--grey-100);
+  }
+
+  .check input {
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    accent-color: var(--white);
+  }
+
+  .form__legal {
+    font-size: 0.8125rem;
+    color: var(--grey-500);
+    margin: 0;
+  }
+
+  .hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .form__submit {
+    justify-self: start;
+  }
+
+  .notice {
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--grey-700);
+  }
+
+  .notice--error {
+    margin: 0;
+    color: var(--grey-100);
+  }
+
+  .notice--ok {
+    padding: 2rem;
+  }
+
+  .notice--ok h2 {
+    margin-bottom: 0.75rem;
+  }
+
+  .notice--ok p {
+    color: var(--grey-100);
+    margin-bottom: 1.5rem;
+  }
+</style>

@@ -102,7 +102,7 @@ Test: carta `4242 4242 4242 4242`, qualsiasi data futura e CVC. Dopo il pagament
 | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | secret | checkout e webhook |
 | `RESEND_API_KEY`, `ORDER_NOTIFICATION_EMAIL` | secret | email transazionali |
 | `BREVO_API_KEY`, `BREVO_LIST_ID` | secret | lista personalizzazione |
-| `TURNSTILE_SECRET_KEY`, `PUBLIC_TURNSTILE_SITE_KEY` | secret / build | anti-spam dei form |
+| `TURNSTILE_SECRET_KEY`, `PUBLIC_TURNSTILE_SITE_KEY` | secret / build | anti-spam dei form. Senza chiavi il widget non appare e la verifica è saltata (solo honeypot) |
 
 Lo schema tipizzato è in `astro.config.mjs` (`env.schema`); nel codice si importano da `astro:env/server`.
 
@@ -121,5 +121,5 @@ Lo stock scala da solo a ogni ordine. Per togliere un prodotto dalla vendita sen
 - [x] **Fase 1, fondamenta**: progetto Sanity `d2cmi1jx` (org Ctrl Studio, dataset privato), seed caricato, prodotto di test visibile in `/shop` in locale. Da fare: `sanity deploy` dello Studio.
 - [ ] Fase 2, catalogo
 - [~] **Fase 3, checkout**: codice completo (carrello, `/api/checkout`, webhook, email, pagine di ritorno). Da testare con chiavi Stripe di test.
-- [ ] Fase 4, form e legali
+- [~] **Fase 4**: form su misura (`/su-misura` → `/api/custom-request`, Turnstile + honeypot, richiesta in Studio + email). Mancano newsletter e pagine legali.
 - [ ] Fase 5, go-live

@@ -1,5 +1,6 @@
 import {ORDER_NOTIFICATION_EMAIL, RESEND_API_KEY} from 'astro:env/server'
 import {formatPrice} from './money'
+import {BUDGET_RANGES, PIECE_TYPES, type CustomRequestInput} from './custom-request'
 
 // Il dominio va verificato su Resend (DNS) prima di usare questo mittente.
 const FROM = 'Frenz Jewelz <ordini@frenzjewelz.it>'
@@ -74,4 +75,31 @@ export async function sendOrderNotification(o: EmailOrder) {
     <h2 style="font-size:15px;margin-top:24px">Spedire a</h2><p>${address(o.shippingAddress)}</p>
     <p>Gestisci stato e tracking nello Studio Sanity, sezione Ordini.</p>`)
   await send(ORDER_NOTIFICATION_EMAIL, `${o.stockIssue ? '[DA VERIFICARE] ' : ''}Nuovo ordine ${o.orderNumber} · ${formatPrice(o.total)}`, html, o.customerEmail)
+}
+
+// --- Richieste su misura ---------------------------------------------------
+
+const label = <T extends readonly {value: string; label: string}[]>(list: T, value?: string) =>
+  list.find((i) => i.value === value)?.label ?? '-'
+
+export async function sendCustomRequestNotification(r: CustomRequestInput) {
+  if (!ORDER_NOTIFICATION_EMAIL) return
+  const html = wrap(`
+    <h1 style="font-size:22px">Nuova richiesta su misura</h1>
+    <p><strong>${esc(r.name)}</strong> · ${esc(r.email)}${r.phone ? ` · ${esc(r.phone)}` : ''}</p>
+    <p><strong>Pezzo:</strong> ${esc(label(PIECE_TYPES, r.pieceType))}<br><strong>Budget:</strong> ${esc(label(BUDGET_RANGES, r.budgetRange))}</p>
+    <p style="white-space:pre-wrap;padding:12px;background:#f4f4f4">${esc(r.message)}</p>
+    ${r.references.length ? `<p><strong>Riferimenti:</strong><br>${r.references.map((u) => `<a href="${esc(u)}">${esc(u)}</a>`).join('<br>')}</p>` : ''}
+    <p>Rispondi a questa email per scrivere direttamente a ${esc(r.name.split(' ')[0] ?? '')}. La richiesta è anche in Studio, sezione Richieste su misura.</p>`)
+  await send(ORDER_NOTIFICATION_EMAIL, `Su misura: ${r.name} · ${label(PIECE_TYPES, r.pieceType)}`, html, r.email)
+}
+
+export async function sendCustomRequestConfirmation(r: CustomRequestInput) {
+  const html = wrap(`
+    <h1 style="font-size:22px">Ricevuto, ${esc(r.name.split(' ')[0] ?? '')}.</h1>
+    <p>Grazie per avermi scritto. Leggo la tua idea e ti rispondo <strong>entro 24 ore</strong> con qualche domanda o una prima proposta.</p>
+    <p style="white-space:pre-wrap;padding:12px;background:#f4f4f4;color:#555">${esc(r.message)}</p>
+    <p>Se nel frattempo vuoi aggiungere qualcosa, rispondi a questa email.</p>
+    <p>FRENZ</p>`)
+  await send(r.email, 'La tua richiesta su misura', html, ORDER_NOTIFICATION_EMAIL)
 }
