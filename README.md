@@ -24,6 +24,8 @@ E-commerce di frenzjewelz.it. Astro 7 (on-demand su Cloudflare Workers) + Sanity
 
 Requisiti: Node 22.12+.
 
+> **Se il progetto sta in una cartella iCloud** (Desktop, Documenti): macOS può "ottimizzare lo spazio" e scaricare dal disco i file di `node_modules`, e Node resta appeso. Su questo Mac le dipendenze stanno in `node_modules.nosync` (iCloud ignora i `.nosync`) con `node_modules` come symlink. Dopo un `rm -rf node_modules` rifare: `npm ci && mv node_modules node_modules.nosync && ln -s node_modules.nosync node_modules`. Meglio ancora: tenere il repo fuori da iCloud.
+
 ### 1. Sanity
 
 ```bash
