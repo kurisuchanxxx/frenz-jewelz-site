@@ -11,12 +11,30 @@ interface Props {
   widths?: number[]
   /** true per le immagini sopra la piega (hero, cover prodotto). */
   priority?: boolean
+  /** Ritaglio centrale: 1.5 = mostra il 66% centrale dell'originale (foto prodotto nelle card). */
+  zoom?: number
   class?: string
 }
 
-const {image, aspect, sizes, widths = [320, 480, 640, 800, 1080, 1400, 1800], priority = false, class: className} = Astro.props
+const {image, aspect, sizes, widths = [320, 480, 640, 800, 1080, 1400, 1800], priority = false, zoom = 1, class: className} = Astro.props
 
-const src = (w: number) => urlFor(image).width(w).height(Math.round(w / aspect)).quality(80).url()
+// Le dimensioni originali sono nel ref dell'asset: image-<hash>-<w>x<h>-<ext>
+const dims = ('_ref' in image.asset ? image.asset._ref : image.asset._id).match(/-(\d+)x(\d+)-/)
+const rect =
+  zoom > 1 && dims
+    ? (() => {
+        const [W, H] = [Number(dims[1]), Number(dims[2])]
+        const w = Math.round(W / zoom)
+        const h = Math.round(Math.min(H, w / aspect))
+        return {x: Math.round((W - w) / 2), y: Math.round((H - h) / 2), w, h}
+      })()
+    : null
+
+const src = (w: number) => {
+  let b = urlFor(image)
+  if (rect) b = b.rect(rect.x, rect.y, rect.w, rect.h)
+  return b.width(w).height(Math.round(w / aspect)).quality(80).url()
+}
 const srcset = widths.map((w) => `${src(w)} ${w}w`).join(', ')
 const base = widths[Math.min(3, widths.length - 1)]
 ---

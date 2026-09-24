@@ -1,7 +1,7 @@
 ---
 import {PortableText} from 'astro-portabletext'
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import SanityImage from '../../components/SanityImage.astro'
+import ProductGallery from '../../islands/ProductGallery.astro'
 import {sanity, urlFor} from '../../lib/sanity'
 import {PRODUCT_QUERY} from '../../lib/queries'
 import {formatPrice} from '../../lib/money'
@@ -61,21 +61,7 @@ const jsonLd = {
   <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} />
 
   <div class="container product">
-    <!-- Galleria: diventa un'isola interattiva in fase 2 -->
-    <div class="gallery">
-      {
-        gallery.map((img, i) => (
-          <div class="gallery__item">
-            <SanityImage
-              image={img}
-              aspect={4 / 5}
-              sizes="(min-width: 900px) 55vw, 100vw"
-              priority={i === 0}
-            />
-          </div>
-        ))
-      }
-    </div>
+    <ProductGallery images={gallery} />
 
     <div class="info">
       <p class="eyebrow">
@@ -162,38 +148,6 @@ const jsonLd = {
       position: sticky;
       top: calc(var(--header-h) + 2rem);
     }
-  }
-
-  .gallery {
-    display: grid;
-    gap: 0.75rem;
-  }
-
-  @media (max-width: 899px) {
-    .gallery {
-      grid-auto-flow: column;
-      grid-auto-columns: 88%;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      margin-inline: calc(var(--gutter) * -1);
-      padding-inline: var(--gutter);
-      scrollbar-width: none;
-    }
-
-    .gallery__item {
-      scroll-snap-align: center;
-    }
-  }
-
-  .gallery__item {
-    aspect-ratio: 4 / 5;
-    background: var(--card-bg);
-  }
-
-  .gallery__item :global(img) {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
   }
 
   .eyebrow a {

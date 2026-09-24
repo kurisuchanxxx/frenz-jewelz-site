@@ -1,0 +1,115 @@
+---
+import SanityImage from '../components/SanityImage.astro'
+import {urlFor} from '../lib/sanity'
+import type {SanityImage as Img} from '../lib/types'
+
+interface Props {
+  images: Img[]
+}
+const {images} = Astro.props
+// Versione grande per la lente: 2400px di larghezza, stesso ritaglio 4:5
+const zoomSrc = (img: Img) => urlFor(img).width(2400).height(3000).quality(80).url()
+---
+
+{/* Galleria: foto in colonna su desktop, scorrimento orizzontale su mobile.
+    Con mouse (pointer: fine) una lente segue il cursore e mostra il dettaglio. */}
+<div class="gallery" data-gallery>
+  {
+    images.map((img, i) => (
+      <div class="gallery__item" data-zoom-src={zoomSrc(img)}>
+        <SanityImage image={img} aspect={4 / 5} sizes="(min-width: 900px) 55vw, 100vw" widths={[480, 640, 800, 1080, 1400]} priority={i === 0} />
+      </div>
+    ))
+  }
+  <div class="lens" data-lens hidden aria-hidden="true"></div>
+</div>
+
+<script>
+  const LENS = 220 // px, lato del quadrato
+  const ZOOM = 2.2 // ingrandimento rispetto all'immagine mostrata
+
+  document.querySelectorAll<HTMLElement>('[data-gallery]').forEach((gallery) => {
+    if (!matchMedia('(pointer: fine)').matches) return
+    const lens = gallery.querySelector<HTMLElement>('[data-lens]')!
+    const preloaded = new Set<string>()
+
+    gallery.querySelectorAll<HTMLElement>('.gallery__item').forEach((item) => {
+      const src = item.dataset.zoomSrc!
+
+      item.addEventListener('pointerenter', () => {
+        if (!preloaded.has(src)) {
+          new Image().src = src
+          preloaded.add(src)
+        }
+        lens.style.backgroundImage = `url("${src}")`
+        lens.hidden = false
+      })
+
+      item.addEventListener('pointermove', (e) => {
+        const r = item.getBoundingClientRect()
+        const px = (e.clientX - r.left) / r.width
+        const py = (e.clientY - r.top) / r.height
+        // Dimensione dell'immagine ingrandita e offset così che il punto sotto il cursore sia al centro della lente
+        const bw = r.width * ZOOM
+        const bh = r.height * ZOOM
+        lens.style.backgroundSize = `${bw}px ${bh}px`
+        lens.style.backgroundPosition = `${LENS / 2 - px * bw}px ${LENS / 2 - py * bh}px`
+        // Lente accanto al cursore, dentro la finestra
+        const x = Math.min(e.clientX + 24, innerWidth - LENS - 8)
+        const y = Math.min(Math.max(e.clientY - LENS / 2, 8), innerHeight - LENS - 8)
+        lens.style.transform = `translate(${x}px, ${y}px)`
+      })
+
+      item.addEventListener('pointerleave', () => (lens.hidden = true))
+    })
+  })
+</script>
+
+<style>
+  .gallery {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  @media (max-width: 899px) {
+    .gallery {
+      grid-auto-flow: column;
+      grid-auto-columns: 88%;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      margin-inline: calc(var(--gutter) * -1);
+      padding-inline: var(--gutter);
+      scrollbar-width: none;
+    }
+
+    .gallery__item {
+      scroll-snap-align: center;
+    }
+  }
+
+  .gallery__item {
+    aspect-ratio: 4 / 5;
+    background: var(--card-bg);
+    cursor: crosshair;
+  }
+
+  .gallery__item :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .lens {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 60;
+    width: 220px;
+    height: 220px;
+    border: 1px solid var(--white);
+    background-color: var(--card-bg);
+    background-repeat: no-repeat;
+    box-shadow: 0 8px 30px rgb(0 0 0 / 0.5);
+    pointer-events: none;
+  }
+</style>
