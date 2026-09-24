@@ -31,6 +31,7 @@ export default defineConfig({
       RESEND_API_KEY: envField.string({context: 'server', access: 'secret', optional: true}),
       BREVO_API_KEY: envField.string({context: 'server', access: 'secret', optional: true}),
       BREVO_LIST_ID: envField.number({context: 'server', access: 'secret', optional: true}),
+      BREVO_DOI_TEMPLATE_ID: envField.number({context: 'server', access: 'secret', optional: true}),
       TURNSTILE_SECRET_KEY: envField.string({context: 'server', access: 'secret', optional: true}),
       PUBLIC_TURNSTILE_SITE_KEY: envField.string({context: 'client', access: 'public', optional: true}),
       ORDER_NOTIFICATION_EMAIL: envField.string({context: 'server', access: 'secret', optional: true}),

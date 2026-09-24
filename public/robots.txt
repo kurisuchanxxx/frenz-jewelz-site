@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /ordine/
+
+Sitemap: https://frenzjewelz.it/sitemap.xml

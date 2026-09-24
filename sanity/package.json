@@ -7,7 +7,7 @@
     "dev": "sanity dev",
     "build": "sanity build",
     "deploy": "sanity deploy",
-    "seed": "sanity exec seed/seed.ts --with-user-token",
+    "seed": "node --env-file-if-exists=.env seed/seed.ts",
     "typecheck": "tsc --noEmit"
   },
   "engines": {

@@ -7,8 +7,10 @@
   ],
   "exclude": [
     "dist",
+    "node_modules.nosync",
     "sanity",
     "Frenz Foto",
-    "frenzjewelzwebp"
+    "frenzjewelzwebp",
+    "04_FrenzJewelz"
   ]
 }

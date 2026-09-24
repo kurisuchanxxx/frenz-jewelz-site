@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import ProductCard from '../../components/ProductCard.astro'
+import NewsletterBox from '../../components/NewsletterBox.astro'
 import {sanity} from '../../lib/sanity'
 import {CATEGORIES_QUERY, PRODUCTS_QUERY} from '../../lib/queries'
 import {getAvailability, isPurchasable} from '../../lib/availability'
@@ -92,6 +93,8 @@ const hrefFor = (categoria?: string) => {
         <p class="empty">Nessun prodotto in questa categoria per ora.</p>
       )
     }
+
+    <NewsletterBox />
   </div>
 </BaseLayout>
 

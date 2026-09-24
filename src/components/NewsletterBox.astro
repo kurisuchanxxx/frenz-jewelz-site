@@ -1,0 +1,145 @@
+---
+// Box "Personalizzazione" dello shop (c'era anche sul sito Aruba): lista Brevo via /api/newsletter.
+const params = Astro.url.searchParams
+const state = params.get('nl')
+const error = params.get('nlErrore')
+---
+
+<section class="newsletter" id="newsletter" aria-labelledby="newsletter-title">
+  <div class="newsletter__text">
+    <h2 id="newsletter-title">Personalizzazione:</h2>
+    <p>Lasciami la tua mail per forgiare insieme gioielli personalizzati.</p>
+  </div>
+
+  <div class="newsletter__form">
+    {
+      state === 'ok' || state === 'confermata' ? (
+        <p class="newsletter__ok" role="status">
+          Fatto, sei dentro. Ti scrivo solo quando c’è qualcosa di nuovo.
+        </p>
+      ) : state === 'conferma' ? (
+        <p class="newsletter__ok" role="status">
+          Quasi fatto: ti ho mandato un’email, clicca il link per confermare l’iscrizione.
+        </p>
+      ) : (
+        <form method="post" action="/api/newsletter" novalidate>
+          {error && (
+            <p class="newsletter__error" role="alert">
+              {error}
+            </p>
+          )}
+          <label for="nl-email" class="visually-hidden">La tua email</label>
+          <div class="newsletter__row">
+            <input id="nl-email" type="email" name="email" required placeholder="Inserisci la tua email" autocomplete="email" maxlength="200" />
+            <button type="submit" class="btn btn--solid">Iscriviti</button>
+          </div>
+          <label class="newsletter__consent">
+            <input type="checkbox" name="consent" required />
+            <span>
+              Accetto la <a href="/privacy">privacy policy</a> e voglio ricevere novità e proposte su misura via email. Puoi cancellarti quando vuoi.
+            </span>
+          </label>
+          <div class="hp" aria-hidden="true">
+            <label>
+              Sito web <input type="text" name="website" tabindex="-1" autocomplete="off" />
+            </label>
+          </div>
+        </form>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .newsletter {
+    display: grid;
+    gap: 2rem;
+    margin-top: clamp(4rem, 10vw, 7rem);
+    padding-top: clamp(2rem, 5vw, 4rem);
+    border-top: 1px solid var(--grey-900);
+    scroll-margin-top: calc(var(--header-h) + 1rem);
+  }
+
+  @media (min-width: 900px) {
+    .newsletter {
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+    }
+  }
+
+  .newsletter__text h2 {
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+    text-transform: none;
+    margin-bottom: 0.75rem;
+  }
+
+  .newsletter__text p {
+    color: var(--grey-100);
+    max-width: 32ch;
+    margin: 0;
+  }
+
+  .newsletter__row {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .newsletter__row input {
+    flex: 1;
+    min-width: 0;
+    min-height: 48px;
+    padding: 0.7em 1em;
+    border: 1px solid var(--grey-700);
+    border-radius: var(--radius-pill);
+    background: var(--black);
+    color: var(--white);
+    font: inherit;
+  }
+
+  .newsletter__row input:focus {
+    outline: none;
+    border-color: var(--white);
+  }
+
+  .newsletter__consent {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.6rem;
+    margin-top: 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--grey-500);
+  }
+
+  .newsletter__consent input {
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    accent-color: var(--white);
+  }
+
+  .newsletter__consent a {
+    color: var(--grey-300);
+  }
+
+  .newsletter__ok,
+  .newsletter__error {
+    margin: 0 0 0.75rem;
+    padding: 0.8em 1em;
+    border: 1px solid var(--grey-700);
+    color: var(--grey-100);
+  }
+
+  .hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  @media (max-width: 480px) {
+    .newsletter__row {
+      flex-direction: column;
+    }
+  }
+</style>

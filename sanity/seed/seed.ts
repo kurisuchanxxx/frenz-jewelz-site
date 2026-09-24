@@ -4,13 +4,24 @@
  *
  *   npm run seed
  *
- * Usa il login della CLI (`npx sanity login`), non serve un token.
+ * Usa il token del login CLI (`npx sanity login`) letto da ~/.config/sanity/config.json.
+ * Script Node puro (niente `sanity exec`): gira con `node seed/seed.ts` (Node 22.18+).
  */
-import {createReadStream} from 'node:fs'
+import {createReadStream, readFileSync} from 'node:fs'
+import {homedir} from 'node:os'
 import {fileURLToPath} from 'node:url'
-import {getCliClient} from 'sanity/cli'
+import {createClient} from '@sanity/client'
+import {DRAFT_PAGES} from './pages.ts'
 
-const client = getCliClient({apiVersion: '2026-09-01'})
+const cliConfig = JSON.parse(readFileSync(`${homedir()}/.config/sanity/config.json`, 'utf8')) as {authToken?: string}
+if (!cliConfig.authToken) throw new Error('Fai prima `npx sanity login`.')
+const client = createClient({
+  projectId: process.env.SANITY_STUDIO_PROJECT_ID ?? 'd2cmi1jx',
+  dataset: process.env.SANITY_STUDIO_DATASET ?? 'production',
+  apiVersion: '2026-09-01',
+  token: cliConfig.authToken,
+  useCdn: false,
+})
 const asset = (name: string) => fileURLToPath(new URL(`./assets/${name}`, import.meta.url))
 
 const CATEGORIES = [
@@ -233,6 +244,49 @@ async function seedProducts(categoryIds: Record<string, string>) {
   }
 }
 
+/** Converte il testo semplice delle bozze in Portable Text (h2, paragrafi, elenchi). */
+function textToBlocks(text: string) {
+  const blocks: Record<string, unknown>[] = []
+  let n = 0
+  const block = (style: string, content: string, extra: Record<string, unknown> = {}) => {
+    n++
+    blocks.push({
+      _type: 'block',
+      _key: `b${n}`,
+      style,
+      markDefs: [],
+      children: [{_type: 'span', _key: `b${n}s`, text: content, marks: []}],
+      ...extra,
+    })
+  }
+  for (const line of text.split('\n')) {
+    const t = line.trim()
+    if (!t) continue
+    if (t.startsWith('## ')) block('h2', t.slice(3))
+    else if (t.startsWith('- ')) block('normal', t.slice(2), {listItem: 'bullet', level: 1})
+    else block('normal', t)
+  }
+  return blocks
+}
+
+async function seedDraftPages() {
+  for (const page of DRAFT_PAGES) {
+    const exists = await client.fetch<boolean>(
+      `defined(*[_type == "page" && slug.current == $slug][0]._id)`,
+      {slug: page.slug},
+    )
+    if (exists) continue
+    await client.create({
+      _type: 'page',
+      title: page.title,
+      slug: {_type: 'slug', current: page.slug},
+      body: textToBlocks(page.body),
+      seo: {metaDescription: page.description},
+    })
+    console.log(`+ pagina ${page.title} (bozza)`)
+  }
+}
+
 async function seedTestProduct(categoryIds: Record<string, string>) {
   const exists = await client.fetch<boolean>(
     `defined(*[_type == "product" && slug.current == "prodotto-di-test"][0]._id)`,
@@ -269,6 +323,7 @@ await seedSettings()
 await seedAboutPage()
 await seedAboutFourthImage()
 await seedCollabs()
+await seedDraftPages()
 await seedProducts(categoryIds)
 await seedTestProduct(categoryIds)
 console.log('Seed completato.')
