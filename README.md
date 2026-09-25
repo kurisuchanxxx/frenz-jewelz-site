@@ -109,6 +109,21 @@ Test: carta `4242 4242 4242 4242`, qualsiasi data futura e CVC. Dopo il pagament
 
 Lo schema tipizzato è in `astro.config.mjs` (`env.schema`); nel codice si importano da `astro:env/server`.
 
+## Chi gestisce cosa (handoff a FRENZ)
+
+| Cosa | Dove |
+|---|---|
+| Prodotti, foto, prezzi, stock, descrizioni, categorie, collab | Sanity Studio → https://frenzjewelz.sanity.studio |
+| Testi pagine (about, spedizioni, legali), foto home e lookbook, barra annunci | Sanity Studio → Impostazioni sito / Pagine |
+| Opzioni e costi di spedizione, soglia spedizione gratuita | Sanity Studio → Impostazioni sito (arrivano al checkout Stripe) |
+| Ordini: stato, tracking, note. Richieste su misura | Sanity Studio → Ordini / Richieste su misura |
+| Incassi, bonifici, rimborsi, contestazioni | Stripe Dashboard (account di FRENZ) |
+| Metodi di pagamento (carta, Apple/Google Pay, PayPal, Klarna…) | Stripe → Impostazioni → Metodi di pagamento |
+| Codici sconto | Stripe → Prodotti → Coupon (checkout con `allow_promotion_codes`) |
+| Ricevute automatiche ed export transazioni | Stripe (le fatture elettroniche restano al commercialista) |
+| Newsletter: contatti e invii | Brevo |
+| Dominio, DNS, hosting, codice | Ctrl Studio |
+
 ## Aggiungere un prodotto (per FRENZ)
 
 1. Apri lo Studio, vai su **Prodotti** e premi **+**.
