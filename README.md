@@ -57,8 +57,10 @@ npm run check               # typecheck
 
 ```bash
 npx wrangler login
-npm run deploy              # astro build && wrangler deploy
+PUBLIC_SITE_URL=https://frenzjewelz.it npm run deploy   # astro build && wrangler deploy
 ```
+
+`PUBLIC_SITE_URL` viene letto **al build** (URL canonico, sitemap, ritorno da Stripe): nel `.env` locale è `http://localhost:4321`, quindi al deploy va passato quello di produzione. Finché il dominio non è attivo, usare l'URL `*.workers.dev`.
 
 Segreti del Worker, una volta sola (e ogni volta che cambiano):
 
@@ -123,4 +125,4 @@ Lo stock scala da solo a ogni ordine. Per togliere un prodotto dalla vendita sen
 - [ ] Fase 2, catalogo
 - [~] **Fase 3, checkout**: codice completo (carrello, `/api/checkout`, webhook, email, pagine di ritorno). Da testare con chiavi Stripe di test.
 - [~] **Fase 4**: form su misura, newsletter (`/api/newsletter` → Brevo, double opt-in se `BREVO_DOI_TEMPLATE_ID`), pagine legali/info in **bozza** in Studio (privacy, cookie, termini, spedizioni-resi, guida: i valori tra [PARENTESI] vanno compilati). Mancano chiavi Turnstile/Resend/Brevo.
-- [~] Fase 5: sitemap.xml dinamica e robots.txt fatti. Mancano redirect Aruba, analytics, deploy, DNS, Stripe live.
+- [~] Fase 5: sitemap, robots, redirect Aruba, analytics (con token) e **deploy di prova** su https://frenz-jewelz.christianraylantieri.workers.dev (secret Sanity caricati). Mancano: chiavi Stripe/Resend/Brevo/Turnstile in produzione, dominio e DNS, Stripe live, Lighthouse.
