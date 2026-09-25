@@ -102,6 +102,7 @@ Test: carta `4242 4242 4242 4242`, qualsiasi data futura e CVC. Dopo il pagament
 | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | secret | checkout e webhook |
 | `RESEND_API_KEY`, `ORDER_NOTIFICATION_EMAIL` | secret | email transazionali |
 | `BREVO_API_KEY`, `BREVO_LIST_ID`, `BREVO_DOI_TEMPLATE_ID` | secret | lista personalizzazione; il template DOI (opzionale) attiva il double opt-in |
+| `PUBLIC_CF_BEACON_TOKEN` | build | Cloudflare Web Analytics (senza cookie); vuoto = nessuno script |
 | `TURNSTILE_SECRET_KEY`, `PUBLIC_TURNSTILE_SITE_KEY` | secret / build | anti-spam dei form. Senza chiavi il widget non appare e la verifica è saltata (solo honeypot) |
 
 Lo schema tipizzato è in `astro.config.mjs` (`env.schema`); nel codice si importano da `astro:env/server`.

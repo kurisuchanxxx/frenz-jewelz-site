@@ -1,0 +1,24 @@
+# Redirect 301 dai vecchi URL del sito Aruba (Supersite) ai nuovi.
+# Formato Cloudflare: origine destinazione codice. :slug e :id sono segnaposto.
+
+# Pagine
+/home              /            301
+/it                /            301
+/it/home           /            301
+/it/shop           /shop        301
+/it/about          /about       301
+/contacts          /su-misura   301
+/it/contacts       /su-misura   301
+/contattami        /su-misura   301
+/privacy-policy    /privacy     301
+/cookie-policy     /cookie      301
+
+# Prodotti con slug diverso dal vecchio
+/it/shop/productidn/330070/wutang   /shop/wu-tang   301
+/shop/productidn/330070/wutang      /shop/wu-tang   301
+
+# Prodotti: lo slug è lo stesso
+/it/shop/productidn/:id/:slug   /shop/:slug   301
+/shop/productidn/:id/:slug      /shop/:slug   301
+/it/shop/productdn/:id/:slug    /shop/:slug   301
+/shop/productdn/:id/:slug       /shop/:slug   301
