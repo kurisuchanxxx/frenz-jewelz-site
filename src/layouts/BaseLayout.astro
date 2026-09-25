@@ -17,6 +17,9 @@ interface Props {
 
 const {title, description = 'Gioielli in argento 925 fatti a mano ad Ancona. Pezzi unici, piccole serie e su misura.', ogImage, noindex = false} = Astro.props
 
+// Indirizzo di prova (*.workers.dev): mai indicizzare, solo il dominio vero.
+const isPreviewHost = Astro.url.hostname.endsWith('.workers.dev')
+
 const settings = await sanity.fetch<SiteSettings | null>(SETTINGS_QUERY)
 const fullTitle = title ? `${title} | Frenz Jewelz` : 'Frenz Jewelz | Gioielli in argento fatti a mano'
 const canonical = new URL(Astro.url.pathname, Astro.site)
@@ -32,7 +35,7 @@ const ogImageUrl = image ? urlFor(image).width(1200).height(630).format('jpg').u
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    {noindex && <meta name="robots" content="noindex" />}
+    {(noindex || isPreviewHost) && <meta name="robots" content="noindex, nofollow" />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <meta name="theme-color" content="#000000" />

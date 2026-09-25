@@ -24,7 +24,7 @@ E-commerce di frenzjewelz.it. Astro 7 (on-demand su Cloudflare Workers) + Sanity
 
 Requisiti: Node 22.12+.
 
-> **Se il progetto sta in una cartella iCloud** (Desktop, Documenti): macOS può "ottimizzare lo spazio" e scaricare dal disco i file di `node_modules`, e Node resta appeso. Su questo Mac le dipendenze stanno in `node_modules.nosync` (iCloud ignora i `.nosync`) con `node_modules` come symlink. Dopo un `rm -rf node_modules` rifare: `npm ci && mv node_modules node_modules.nosync && ln -s node_modules.nosync node_modules`. Meglio ancora: tenere il repo fuori da iCloud.
+> **Se il progetto sta in una cartella iCloud** (Desktop, Documenti): macOS può "ottimizzare lo spazio" e scaricare dal disco i file di `node_modules`, e Node resta appeso. Su questo Mac le dipendenze stanno fuori dal progetto, in `~/Library/Caches/frenz-website/{site,sanity}/node_modules`, con `node_modules` come symlink (fuori da iCloud e fuori dalla scansione di Vite). Dopo un `rm -rf node_modules` rifare: `npm ci && mv node_modules ~/Library/Caches/frenz-website/site/node_modules && ln -s ~/Library/Caches/frenz-website/site/node_modules node_modules` (idem in `sanity/`). Meglio ancora: tenere il repo fuori da iCloud.
 
 ### 1. Sanity
 
@@ -42,7 +42,7 @@ Su sanity.io/manage, nel progetto:
 - **API > Tokens**: crea un token *Viewer* (`SANITY_API_READ_TOKEN`) e uno *Editor* (`SANITY_API_WRITE_TOKEN`, fase 3).
 - **API > CORS origins**: aggiungi `http://localhost:3333` e l'URL dello Studio.
 
-Deploy dello Studio: `npm run deploy` (dentro `/sanity`).
+Deploy dello Studio: `npm run deploy` (dentro `/sanity`) → https://frenzjewelz.sanity.studio (già online).
 
 ### 2. Sito
 
@@ -121,7 +121,7 @@ Lo stock scala da solo a ogni ordine. Per togliere un prodotto dalla vendita sen
 
 ## Stato
 
-- [x] **Fase 1, fondamenta**: progetto Sanity `d2cmi1jx` (org Ctrl Studio, dataset privato), seed caricato, prodotto di test visibile in `/shop` in locale. Da fare: `sanity deploy` dello Studio.
+- [x] **Fase 1, fondamenta**: progetto Sanity `d2cmi1jx` (org Ctrl Studio, dataset privato), seed caricato, prodotto di test visibile in `/shop` in locale. Studio online su frenzjewelz.sanity.studio.
 - [ ] Fase 2, catalogo
 - [~] **Fase 3, checkout**: codice completo (carrello, `/api/checkout`, webhook, email, pagine di ritorno). Da testare con chiavi Stripe di test.
 - [~] **Fase 4**: form su misura, newsletter (`/api/newsletter` → Brevo, double opt-in se `BREVO_DOI_TEMPLATE_ID`), pagine legali/info in **bozza** in Studio (privacy, cookie, termini, spedizioni-resi, guida: i valori tra [PARENTESI] vanno compilati). Mancano chiavi Turnstile/Resend/Brevo.

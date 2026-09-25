@@ -2,4 +2,3 @@ node_modules
 dist
 .sanity
 .env
-node_modules.nosync

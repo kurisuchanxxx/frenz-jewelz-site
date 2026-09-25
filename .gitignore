@@ -32,6 +32,3 @@ pnpm-debug.log*
 Frenz Foto/
 frenzjewelzwebp/
 04_FrenzJewelz/
-
-# iCloud: le dipendenze vivono in *.nosync (vedi README), node_modules è un symlink
-node_modules.nosync/
