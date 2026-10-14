@@ -190,6 +190,14 @@ export const product = defineType({
       initialValue: 'Argento 925',
     }),
     defineField({
+      name: 'chainIncluded',
+      title: 'Catena inclusa',
+      type: 'boolean',
+      group: 'content',
+      description: 'Spento: sul sito compare "Catena non inclusa" (quella in foto è solo per la presentazione).',
+      initialValue: false,
+    }),
+    defineField({
       name: 'details',
       title: 'Dettagli',
       type: 'productDetails',

@@ -48,6 +48,7 @@ export const PRODUCT_QUERY = defineQuery(`*[_type == "product" && slug.current =
   shortDescription,
   description,
   material,
+  chainIncluded,
   details,
   leadTimeDays,
   isPersonalizable,

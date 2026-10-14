@@ -28,6 +28,8 @@ export default defineConfig({
       SANITY_API_WRITE_TOKEN: envField.string({context: 'server', access: 'secret', optional: true}),
       STRIPE_SECRET_KEY: envField.string({context: 'server', access: 'secret', optional: true}),
       STRIPE_WEBHOOK_SECRET: envField.string({context: 'server', access: 'secret', optional: true}),
+      GMAIL_USER: envField.string({context: 'server', access: 'secret', optional: true}),
+      GMAIL_APP_PASSWORD: envField.string({context: 'server', access: 'secret', optional: true}),
       RESEND_API_KEY: envField.string({context: 'server', access: 'secret', optional: true}),
       TURNSTILE_SECRET_KEY: envField.string({context: 'server', access: 'secret', optional: true}),
       PUBLIC_TURNSTILE_SITE_KEY: envField.string({context: 'client', access: 'public', optional: true}),

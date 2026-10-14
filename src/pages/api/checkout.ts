@@ -50,8 +50,8 @@ export const POST: APIRoute = async ({request}) => {
   const sanity = getSanityFresh()
   const ids = [...new Set(lines.map((l) => l.id))]
   const [products, settings] = await Promise.all([
-    sanity.fetch<(ProductCard & {image?: {asset: {_ref: string}}})[]>(
-      `*[_type == "product" && _id in $ids]{_id, title, "slug": slug.current, price, "image": images[0], productionType, stock, isAvailable}`,
+    sanity.fetch<(ProductCard & {image?: {asset: {_ref: string}}; chainIncluded?: boolean})[]>(
+      `*[_type == "product" && _id in $ids]{_id, title, "slug": slug.current, price, "image": images[0], productionType, stock, isAvailable, chainIncluded}`,
       {ids},
     ),
     sanity.fetch<CheckoutSettings | null>(`*[_id == "siteSettings"][0]{shippingOptions[]{_key, label, price, minDays, maxDays}, freeShippingThreshold}`),
@@ -80,6 +80,7 @@ export const POST: APIRoute = async ({request}) => {
         unit_amount: p.price,
         product_data: {
           name: p.title,
+          description: p.chainIncluded ? 'Argento 925, pezzo unico. Catena inclusa.' : 'Argento 925, pezzo unico. Catena non inclusa.',
           images: p.image ? [urlFor(p.image).width(600).height(750).format('jpg').url()] : [],
           metadata: {sanityId: p._id},
         },

@@ -22,6 +22,7 @@ const AVAILABILITY_LABEL = {
 
 const details = [
   ['Materiale', product.material],
+  ['Catena', product.chainIncluded ? 'Inclusa' : 'Non inclusa'],
   ['Dimensioni', product.details?.dimensions],
   ['Lunghezza catena', product.details?.chainLength],
   ['Peso', product.details?.weight],
@@ -74,6 +75,8 @@ const jsonLd = {
         {formatPrice(product.price)}
         <span class="price__note">IVA inclusa</span>
       </p>
+
+      {!product.chainIncluded && <p class="chain-note">Catena non inclusa: quella in foto serve solo per la presentazione.</p>}
 
       <p class="availability" data-state={availability}>{AVAILABILITY_LABEL[availability]}</p>
 
@@ -175,6 +178,15 @@ const jsonLd = {
     font-size: 0.75rem;
     font-weight: 400;
     color: var(--grey-500);
+  }
+
+  .chain-note {
+    display: inline-block;
+    padding: 0.35em 0.9em;
+    border: 1px solid var(--grey-700);
+    border-radius: var(--radius-pill);
+    font-size: 0.8125rem;
+    color: var(--grey-100);
   }
 
   .availability {

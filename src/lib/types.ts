@@ -35,6 +35,7 @@ export interface Product extends ProductCard {
   shortDescription?: string
   description?: PortableTextBlock[]
   material?: string
+  chainIncluded?: boolean
   details?: {dimensions?: string; chainLength?: string; weight?: string; finish?: string}
   leadTimeDays?: number
   isPersonalizable?: boolean

@@ -69,7 +69,7 @@ Segreti del Worker, una volta sola (e ogni volta che cambiano):
 npx wrangler secret put SANITY_API_READ_TOKEN
 ```
 
-Stessa cosa per `SANITY_API_WRITE_TOKEN`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, `TURNSTILE_SECRET_KEY`, `ORDER_NOTIFICATION_EMAIL` (più indirizzi separati da virgola).
+Stessa cosa per `SANITY_API_WRITE_TOKEN`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `RESEND_API_KEY`, `TURNSTILE_SECRET_KEY`, `ORDER_NOTIFICATION_EMAIL` (più indirizzi separati da virgola).
 
 I valori pubblici (`SANITY_PROJECT_ID`, `SANITY_DATASET`, `PUBLIC_SITE_URL`, `PUBLIC_TURNSTILE_SITE_KEY`) vengono letti **al build**: vanno nel `.env` locale o nelle variabili di build di Workers Builds, se il deploy parte da Git.
 
@@ -90,7 +90,13 @@ stripe listen --forward-to localhost:4321/api/stripe-webhook
 Il comando stampa un `whsec_…`: va in `STRIPE_WEBHOOK_SECRET`. In produzione si crea un endpoint su Dashboard → Webhook con l'evento `checkout.session.completed` e si usa il suo secret.
 
 4. Token Sanity *Editor* in `SANITY_API_WRITE_TOKEN` (il webhook scrive ordini e stock).
-5. Resend: verificare il dominio `frenzjewelz.it` (DNS) e mettere la chiave in `RESEND_API_KEY`; `ORDER_NOTIFICATION_EMAIL` è l'indirizzo di FRENZ. Il mittente è in `src/lib/email.ts`.
+5. Email (conferma al cliente, notifica a FRENZ, richieste su misura), senza provider esterno: partono dal Gmail di FRENZ via SMTP.
+   - Su `frjewelzlab@gmail.com`: attivare la verifica in due passaggi, poi creare una **password per app** (Account Google → Sicurezza → Password per le app).
+   - `GMAIL_USER=frjewelzlab@gmail.com` e `GMAIL_APP_PASSWORD=<16 caratteri>` come secret del Worker (mai nel repo né in chat).
+   - `ORDER_NOTIFICATION_EMAIL`: uno o più indirizzi separati da virgola.
+   - Limite Gmail circa 500 email/giorno. Se la password Google cambia, la password per app va rigenerata.
+   - Alternativa: `RESEND_API_KEY` (dominio verificato su Resend). Gmail ha la precedenza se configurato.
+   - In più, su Stripe → Impostazioni → Email clienti: attivare le ricevute per i pagamenti riusciti.
 
 Test: carta `4242 4242 4242 4242`, qualsiasi data futura e CVC. Dopo il pagamento: ordine in Studio → Ordini → Da gestire, stock scalato, due email. Rilanciando lo stesso evento (`stripe events resend <id>`) l'ordine non si duplica.
 
@@ -103,7 +109,9 @@ Test: carta `4242 4242 4242 4242`, qualsiasi data futura e CVC. Dopo il pagament
 | `SANITY_API_READ_TOKEN` | secret | lettura del dataset privato |
 | `SANITY_API_WRITE_TOKEN` | secret | ordini e richieste (solo server) |
 | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | secret | checkout e webhook |
-| `RESEND_API_KEY`, `ORDER_NOTIFICATION_EMAIL` | secret | email transazionali |
+| `GMAIL_USER`, `GMAIL_APP_PASSWORD` | secret | email dal Gmail di FRENZ (canale principale) |
+| `RESEND_API_KEY` | secret | alternativa a Gmail |
+| `ORDER_NOTIFICATION_EMAIL` | secret | destinatari notifiche, separati da virgola |
 | `PUBLIC_CF_BEACON_TOKEN` | build | Cloudflare Web Analytics (senza cookie); vuoto = nessuno script |
 | `TURNSTILE_SECRET_KEY`, `PUBLIC_TURNSTILE_SITE_KEY` | secret / build | anti-spam dei form. Senza chiavi il widget non appare e la verifica è saltata (solo honeypot) |
 

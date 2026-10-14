@@ -27,7 +27,7 @@ Se un pezzo arriva danneggiato o ha un difetto di lavorazione, scrivici entro 48
     slug: 'guida',
     description: 'Come scegliere la lunghezza della catena e la misura dell’anello, e come tenere l’argento 925 sempre lucido.',
     body: `## Ciondolo e catena
-I ciondoli FRENZ sono venduti senza catena [DA CONFERMARE]: puoi montarli sulla catena che hai già. Per scegliere la lunghezza: 45 cm cade vicino al collo, 50 cm appena sotto la clavicola, 60 cm sul petto. Le misure di ogni ciondolo (larghezza × altezza) e il peso sono nella scheda prodotto.
+I ciondoli FRENZ sono venduti senza catena: quella che vedi nelle foto serve solo per la presentazione. Puoi montarli sulla catena che hai già. Per scegliere la lunghezza: 45 cm cade vicino al collo, 50 cm appena sotto la clavicola, 60 cm sul petto. Le misure di ogni ciondolo (larghezza × altezza) e il peso sono nella scheda prodotto.
 
 ## Misura dell'anello
 Se hai già un anello che ti sta bene, misura il diametro interno con un righello e confrontalo con questa tabella:

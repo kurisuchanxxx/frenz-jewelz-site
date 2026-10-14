@@ -1,9 +1,10 @@
-import {ORDER_NOTIFICATION_EMAIL, RESEND_API_KEY} from 'astro:env/server'
+import {GMAIL_APP_PASSWORD, GMAIL_USER, ORDER_NOTIFICATION_EMAIL, RESEND_API_KEY} from 'astro:env/server'
 import {formatPrice} from './money'
 import {BUDGET_RANGES, PIECE_TYPES, type CustomRequestInput} from './custom-request'
 
-// Il dominio va verificato su Resend (DNS) prima di usare questo mittente.
-const FROM = 'Frenz Jewelz <ordini@frenzjewelz.it>'
+const FROM_NAME = 'Frenz Jewelz'
+// Solo per Resend: il dominio va verificato su Resend (DNS) prima di usare questo mittente.
+const RESEND_FROM = `${FROM_NAME} <ordini@frenzjewelz.it>`
 
 interface EmailOrder {
   orderNumber: string
@@ -20,18 +21,67 @@ interface EmailOrder {
 const notifyList = () => (ORDER_NOTIFICATION_EMAIL ?? '').split(',').map((e) => e.trim()).filter(Boolean)
 const replyToFrenz = () => notifyList()[0]
 
+/**
+ * Invio email. Canale principale: il Gmail di FRENZ via SMTP (GMAIL_USER + password per app),
+ * nessun provider esterno. In alternativa Resend, se configurato. Senza nessuno dei due: solo log.
+ */
 async function send(to: string | string[], subject: string, html: string, replyTo?: string) {
-  if (!RESEND_API_KEY) {
-    console.warn('RESEND_API_KEY assente: email non inviata', {to, subject})
-    return
+  const recipients = Array.isArray(to) ? to : [to]
+  try {
+    if (GMAIL_USER && GMAIL_APP_PASSWORD) return await sendGmail(recipients, subject, html, replyTo)
+    if (RESEND_API_KEY) return await sendResend(recipients, subject, html, replyTo)
+    console.warn('Nessun canale email configurato: email non inviata', {to, subject})
+  } catch (err) {
+    // Le email non bloccano mai ordine o richiesta (già salvati): si logga e si va avanti.
+    console.error('Email non inviata', {subject, to: recipients}, err)
   }
+}
+
+async function sendGmail(to: string[], subject: string, html: string, replyTo?: string) {
+  // Import dinamico: `cloudflare:sockets` esiste solo nel runtime Workers (anche in `astro dev`).
+  const {WorkerMailer} = await import('worker-mailer')
+  const mailer = await WorkerMailer.connect({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    credentials: {username: GMAIL_USER!, password: GMAIL_APP_PASSWORD!.replace(/\s/g, '')},
+    authType: 'plain',
+  })
+  try {
+    await mailer.send({
+      from: {name: FROM_NAME, email: GMAIL_USER!},
+      to: to.map((email) => ({email})),
+      reply: replyTo ? {email: replyTo} : undefined,
+      subject,
+      html,
+      text: htmlToText(html),
+    })
+  } finally {
+    await mailer.close().catch(() => {})
+  }
+}
+
+async function sendResend(to: string[], subject: string, html: string, replyTo?: string) {
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json'},
-    body: JSON.stringify({from: FROM, to: Array.isArray(to) ? to : [to], subject, html, reply_to: replyTo}),
+    body: JSON.stringify({from: RESEND_FROM, to, subject, html, reply_to: replyTo}),
   })
   if (!res.ok) console.error('Resend', res.status, await res.text())
 }
+
+/** Versione testo semplice: alcuni client e filtri antispam la vogliono accanto all'HTML. */
+const htmlToText = (html: string) =>
+  html
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(p|h1|h2|tr|div)>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
 
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'})[c]!)
 
