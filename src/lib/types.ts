@@ -58,6 +58,10 @@ export interface SiteSettings {
   heroSubline?: string
   collabHeadline?: string
   collabSubline?: string
+  collabIntro?: string
+  legalName?: string
+  vatNumber?: string
+  legalAddress?: string
   lookbookImages?: SanityImage[]
   announcementBar?: string
   instagramUrl?: string

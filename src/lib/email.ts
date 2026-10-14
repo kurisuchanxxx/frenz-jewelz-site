@@ -16,7 +16,11 @@ interface EmailOrder {
   stockIssue: boolean
 }
 
-async function send(to: string, subject: string, html: string, replyTo?: string) {
+// ORDER_NOTIFICATION_EMAIL può contenere più indirizzi separati da virgola.
+const notifyList = () => (ORDER_NOTIFICATION_EMAIL ?? '').split(',').map((e) => e.trim()).filter(Boolean)
+const replyToFrenz = () => notifyList()[0]
+
+async function send(to: string | string[], subject: string, html: string, replyTo?: string) {
   if (!RESEND_API_KEY) {
     console.warn('RESEND_API_KEY assente: email non inviata', {to, subject})
     return
@@ -24,7 +28,7 @@ async function send(to: string, subject: string, html: string, replyTo?: string)
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {Authorization: `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json'},
-    body: JSON.stringify({from: FROM, to: [to], subject, html, reply_to: replyTo}),
+    body: JSON.stringify({from: FROM, to: Array.isArray(to) ? to : [to], subject, html, reply_to: replyTo}),
   })
   if (!res.ok) console.error('Resend', res.status, await res.text())
 }
@@ -59,11 +63,11 @@ export async function sendOrderConfirmation(o: EmailOrder) {
     ${itemsTable(o)}
     <h2 style="font-size:15px;margin-top:24px">Spedizione a</h2><p>${address(o.shippingAddress)}</p>
     <p>Per qualsiasi cosa rispondi a questa email.</p>`)
-  await send(o.customerEmail, `Ordine ${o.orderNumber} confermato`, html, ORDER_NOTIFICATION_EMAIL)
+  await send(o.customerEmail, `Ordine ${o.orderNumber} confermato`, html, replyToFrenz())
 }
 
 export async function sendOrderNotification(o: EmailOrder) {
-  if (!ORDER_NOTIFICATION_EMAIL) return
+  if (notifyList().length === 0) return
   const warning = o.stockIssue
     ? `<p style="padding:12px;background:#fff3cd;border:1px solid #f0c36d"><strong>Attenzione:</strong> un pezzo risultava già esaurito al momento del pagamento. Ordine segnato <em>da verificare</em>: controlla in Studio ed eventualmente rimborsa da Stripe.</p>`
     : ''
@@ -74,7 +78,7 @@ export async function sendOrderNotification(o: EmailOrder) {
     ${itemsTable(o)}
     <h2 style="font-size:15px;margin-top:24px">Spedire a</h2><p>${address(o.shippingAddress)}</p>
     <p>Gestisci stato e tracking nello Studio Sanity, sezione Ordini.</p>`)
-  await send(ORDER_NOTIFICATION_EMAIL, `${o.stockIssue ? '[DA VERIFICARE] ' : ''}Nuovo ordine ${o.orderNumber} · ${formatPrice(o.total)}`, html, o.customerEmail)
+  await send(notifyList(), `${o.stockIssue ? '[DA VERIFICARE] ' : ''}Nuovo ordine ${o.orderNumber} · ${formatPrice(o.total)}`, html, o.customerEmail)
 }
 
 // --- Richieste su misura ---------------------------------------------------
@@ -83,7 +87,7 @@ const label = <T extends readonly {value: string; label: string}[]>(list: T, val
   list.find((i) => i.value === value)?.label ?? '-'
 
 export async function sendCustomRequestNotification(r: CustomRequestInput) {
-  if (!ORDER_NOTIFICATION_EMAIL) return
+  if (notifyList().length === 0) return
   const html = wrap(`
     <h1 style="font-size:22px">Nuova richiesta su misura</h1>
     <p><strong>${esc(r.name)}</strong> · ${esc(r.email)}${r.phone ? ` · ${esc(r.phone)}` : ''}</p>
@@ -91,7 +95,7 @@ export async function sendCustomRequestNotification(r: CustomRequestInput) {
     <p style="white-space:pre-wrap;padding:12px;background:#f4f4f4">${esc(r.message)}</p>
     ${r.references.length ? `<p><strong>Riferimenti:</strong><br>${r.references.map((u) => `<a href="${esc(u)}">${esc(u)}</a>`).join('<br>')}</p>` : ''}
     <p>Rispondi a questa email per scrivere direttamente a ${esc(r.name.split(' ')[0] ?? '')}. La richiesta è anche in Studio, sezione Richieste su misura.</p>`)
-  await send(ORDER_NOTIFICATION_EMAIL, `Su misura: ${r.name} · ${label(PIECE_TYPES, r.pieceType)}`, html, r.email)
+  await send(notifyList(), `Su misura: ${r.name} · ${label(PIECE_TYPES, r.pieceType)}`, html, r.email)
 }
 
 export async function sendCustomRequestConfirmation(r: CustomRequestInput) {
@@ -101,5 +105,5 @@ export async function sendCustomRequestConfirmation(r: CustomRequestInput) {
     <p style="white-space:pre-wrap;padding:12px;background:#f4f4f4;color:#555">${esc(r.message)}</p>
     <p>Se nel frattempo vuoi aggiungere qualcosa, rispondi a questa email.</p>
     <p>FRENZ</p>`)
-  await send(r.email, 'La tua richiesta su misura', html, ORDER_NOTIFICATION_EMAIL)
+  await send(r.email, 'La tua richiesta su misura', html, replyToFrenz())
 }

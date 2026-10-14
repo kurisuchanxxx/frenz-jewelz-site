@@ -9,9 +9,9 @@
   --grey-900: #141414;
   --card-bg: #efefef; /* fondo uniforme delle foto prodotto */
 
-  /* Font da definire con FRENZ (domanda aperta 7): per ora una sola famiglia sans di sistema. */
   --font-sans: 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif;
-  --font-display: var(--font-sans);
+  /* Titoli: tag graffiti a mano. Un solo peso (400), solo per h1, h2 e wordmark. */
+  --font-display: 'Sedgwick Ave Display', 'Helvetica Neue', Arial, sans-serif;
 
   --gutter: clamp(16px, 4vw, 48px);
   --max: 1440px;
@@ -63,12 +63,19 @@ a {
 h1,
 h2,
 h3 {
-  font-family: var(--font-display);
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: -0.01em;
   line-height: 1;
   margin: 0;
+}
+
+h1,
+h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.05;
 }
 
 h1 {
@@ -212,6 +219,9 @@ p {
 
 .prose h2,
 .prose h3 {
+  font-family: var(--font-sans);
+  font-weight: 800;
+  letter-spacing: 0.02em;
   margin: 2em 0 0.6em;
   font-size: 1.25rem;
   letter-spacing: 0.02em;

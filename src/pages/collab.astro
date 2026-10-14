@@ -4,15 +4,19 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import SanityImage from '../components/SanityImage.astro'
 import ProductCard from '../components/ProductCard.astro'
 import {sanity} from '../lib/sanity'
-import {COLLABORATIONS_QUERY} from '../lib/queries'
-import type {Collaboration} from '../lib/types'
+import {COLLABORATIONS_QUERY, SETTINGS_QUERY} from '../lib/queries'
+import type {Collaboration, SiteSettings} from '../lib/types'
 
-const collabs = await sanity.fetch<Collaboration[]>(COLLABORATIONS_QUERY)
+const [collabs, settings] = await Promise.all([
+  sanity.fetch<Collaboration[]>(COLLABORATIONS_QUERY),
+  sanity.fetch<SiteSettings | null>(SETTINGS_QUERY),
+])
 ---
 
 <BaseLayout title="Collab" description="Pezzi unici realizzati con artisti della scena rap e hip hop.">
   <div class="container collab-page">
     <h1>Collab</h1>
+    {settings?.collabIntro && <p class="collab-page__intro">{settings.collabIntro}</p>}
     {collabs.length === 0 && <p class="prose">Le collaborazioni arrivano presto.</p>}
     {
       collabs.map((c) => (
@@ -55,6 +59,13 @@ const collabs = await sanity.fetch<Collaboration[]>(COLLABORATIONS_QUERY)
   }
 
   .collab-page h1 {
+    margin-bottom: 1.5rem;
+  }
+
+  .collab-page__intro {
+    max-width: 56ch;
+    font-size: 1.125rem;
+    color: var(--grey-100);
     margin-bottom: clamp(2rem, 5vw, 4rem);
   }
 

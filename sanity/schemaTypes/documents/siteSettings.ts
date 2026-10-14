@@ -10,6 +10,7 @@ export const siteSettings = defineType({
     {name: 'home', title: 'Home', default: true},
     {name: 'shop', title: 'Shop e spedizioni'},
     {name: 'contacts', title: 'Contatti e social'},
+    {name: 'legal', title: 'Dati legali'},
   ],
   fields: [
     defineField({
@@ -43,6 +44,13 @@ export const siteSettings = defineType({
       type: 'string',
       group: 'home',
       initialValue: 'Pezzi unici per artisti, creator e persone che vivono la strada davvero.',
+    }),
+    defineField({
+      name: 'collabIntro',
+      title: 'Testo introduttivo pagina Collab',
+      type: 'text',
+      rows: 4,
+      group: 'home',
     }),
     defineField({
       name: 'lookbookImages',
@@ -80,6 +88,15 @@ export const siteSettings = defineType({
     defineField({name: 'contactEmail', title: 'Email contatti', type: 'email', group: 'contacts'}),
     defineField({name: 'instagramUrl', title: 'Instagram', type: 'url', group: 'contacts'}),
     defineField({name: 'facebookUrl', title: 'Facebook', type: 'url', group: 'contacts'}),
+    defineField({
+      name: 'legalName',
+      title: 'Ragione sociale',
+      type: 'string',
+      group: 'legal',
+      description: 'Chi vende legalmente (titolare della P.IVA). Appare nel footer e nelle pagine legali.',
+    }),
+    defineField({name: 'vatNumber', title: 'Partita IVA', type: 'string', group: 'legal'}),
+    defineField({name: 'legalAddress', title: 'Sede', type: 'string', group: 'legal'}),
   ],
   preview: {prepare: () => ({title: 'Impostazioni sito'})},
 })

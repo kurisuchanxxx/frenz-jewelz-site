@@ -3,8 +3,11 @@ interface Props {
   instagramUrl?: string
   facebookUrl?: string
   contactEmail?: string
+  legalName?: string
+  vatNumber?: string
+  legalAddress?: string
 }
-const {instagramUrl, facebookUrl, contactEmail} = Astro.props
+const {instagramUrl, facebookUrl, contactEmail, legalName, vatNumber, legalAddress} = Astro.props
 const year = new Date().getFullYear()
 
 const INFO = [
@@ -43,7 +46,12 @@ const LEGAL = [
     <p class="wordmark" aria-hidden="true">FRENZ JEWELZ</p>
 
     <div class="footer__bottom">
-      <span>© {year} Frenz Jewelz · Ancona</span>
+      <span>
+        © {year} Frenz Jewelz
+        {legalName && <> · {legalName}</>}
+        {legalAddress && <> · {legalAddress}</>}
+        {vatNumber && <> · P.IVA {vatNumber}</>}
+      </span>
       <a href="https://www.ctrlstudio.it" rel="noopener" target="_blank">Developed by Ctrl Studio</a>
     </div>
   </div>
@@ -83,7 +91,7 @@ const LEGAL = [
 
   .wordmark {
     font-family: var(--font-display);
-    font-weight: 900;
+    font-weight: 400;
     font-size: clamp(3rem, 13.5vw, 13rem);
     line-height: 0.85;
     letter-spacing: -0.04em;

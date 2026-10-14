@@ -24,7 +24,7 @@ E-commerce di frenzjewelz.it. Astro 7 (on-demand su Cloudflare Workers) + Sanity
 
 Requisiti: Node 22.12+.
 
-> **Se il progetto sta in una cartella iCloud** (Desktop, Documenti): macOS può "ottimizzare lo spazio" e scaricare dal disco i file di `node_modules`, e Node resta appeso. Su questo Mac le dipendenze stanno fuori dal progetto, in `~/Library/Caches/frenz-website/{site,sanity}/node_modules`, con `node_modules` come symlink (fuori da iCloud e fuori dalla scansione di Vite). Dopo un `rm -rf node_modules` rifare: `npm ci && mv node_modules ~/Library/Caches/frenz-website/site/node_modules && ln -s ~/Library/Caches/frenz-website/site/node_modules node_modules` (idem in `sanity/`). Meglio ancora: tenere il repo fuori da iCloud.
+> **Se il progetto sta in una cartella iCloud** (Desktop, Documenti): macOS può "ottimizzare lo spazio" e scaricare dal disco i file di `node_modules`, e Node resta appeso. Su questo Mac le dipendenze stanno fuori dal progetto, in `~/.cache/frenz-website/{site,sanity}/node_modules`, con `node_modules` come symlink (fuori da iCloud e fuori dalla scansione di Vite; non in `~/Library/Caches`, che macOS svuota da solo). Dopo un `rm -rf node_modules` rifare: `npm ci && mv node_modules ~/.cache/frenz-website/site/node_modules && ln -s ~/.cache/frenz-website/site/node_modules node_modules` (idem in `sanity/`). Meglio ancora: tenere il repo fuori da iCloud.
 
 ### 1. Sanity
 
@@ -35,6 +35,7 @@ cp .env.example .env        # SANITY_STUDIO_PROJECT_ID=d2cmi1jx
 npx sanity login
 npm run dev                 # Studio su http://localhost:3333
 npm run seed                # categorie, impostazioni, prodotti, collab, pagine (idempotente)
+node seed/update-2026-10.ts # dati concordati con FRENZ a ottobre 2026 (prezzi, pezzi unici, ritirati, legali)
 ```
 
 Su sanity.io/manage, nel progetto:
@@ -68,7 +69,7 @@ Segreti del Worker, una volta sola (e ogni volta che cambiano):
 npx wrangler secret put SANITY_API_READ_TOKEN
 ```
 
-Stessa cosa per `SANITY_API_WRITE_TOKEN`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, `BREVO_API_KEY`, `BREVO_LIST_ID`, `TURNSTILE_SECRET_KEY`, `ORDER_NOTIFICATION_EMAIL`.
+Stessa cosa per `SANITY_API_WRITE_TOKEN`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`, `TURNSTILE_SECRET_KEY`, `ORDER_NOTIFICATION_EMAIL` (più indirizzi separati da virgola).
 
 I valori pubblici (`SANITY_PROJECT_ID`, `SANITY_DATASET`, `PUBLIC_SITE_URL`, `PUBLIC_TURNSTILE_SITE_KEY`) vengono letti **al build**: vanno nel `.env` locale o nelle variabili di build di Workers Builds, se il deploy parte da Git.
 
@@ -103,7 +104,6 @@ Test: carta `4242 4242 4242 4242`, qualsiasi data futura e CVC. Dopo il pagament
 | `SANITY_API_WRITE_TOKEN` | secret | ordini e richieste (solo server) |
 | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | secret | checkout e webhook |
 | `RESEND_API_KEY`, `ORDER_NOTIFICATION_EMAIL` | secret | email transazionali |
-| `BREVO_API_KEY`, `BREVO_LIST_ID`, `BREVO_DOI_TEMPLATE_ID` | secret | lista personalizzazione; il template DOI (opzionale) attiva il double opt-in |
 | `PUBLIC_CF_BEACON_TOKEN` | build | Cloudflare Web Analytics (senza cookie); vuoto = nessuno script |
 | `TURNSTILE_SECRET_KEY`, `PUBLIC_TURNSTILE_SITE_KEY` | secret / build | anti-spam dei form. Senza chiavi il widget non appare e la verifica è saltata (solo honeypot) |
 
@@ -121,7 +121,6 @@ Lo schema tipizzato è in `astro.config.mjs` (`env.schema`); nel codice si impor
 | Metodi di pagamento (carta, Apple/Google Pay, PayPal, Klarna…) | Stripe → Impostazioni → Metodi di pagamento |
 | Codici sconto | Stripe → Prodotti → Coupon (checkout con `allow_promotion_codes`) |
 | Ricevute automatiche ed export transazioni | Stripe (le fatture elettroniche restano al commercialista) |
-| Newsletter: contatti e invii | Brevo |
 | Dominio, DNS, hosting, codice | Ctrl Studio |
 
 ## Aggiungere un prodotto (per FRENZ)
@@ -139,5 +138,5 @@ Lo stock scala da solo a ogni ordine. Per togliere un prodotto dalla vendita sen
 - [x] **Fase 1, fondamenta**: progetto Sanity `d2cmi1jx` (org Ctrl Studio, dataset privato), seed caricato, prodotto di test visibile in `/shop` in locale. Studio online su frenzjewelz.sanity.studio.
 - [ ] Fase 2, catalogo
 - [~] **Fase 3, checkout**: codice completo (carrello, `/api/checkout`, webhook, email, pagine di ritorno). Da testare con chiavi Stripe di test.
-- [~] **Fase 4**: form su misura, newsletter (`/api/newsletter` → Brevo, double opt-in se `BREVO_DOI_TEMPLATE_ID`), pagine legali/info in **bozza** in Studio (privacy, cookie, termini, spedizioni-resi, guida: i valori tra [PARENTESI] vanno compilati). Mancano chiavi Turnstile/Resend/Brevo.
+- [~] **Fase 4**: form su misura e pagine legali/info compilate con i dati di Daniela B. Gioielleria Artigiana (restano tra [PARENTESI] corriere, tempi, IVA, servizio email). Newsletter tolta su richiesta di FRENZ.
 - [~] Fase 5: sitemap, robots, redirect Aruba, analytics (con token) e **deploy di prova** su https://frenz-jewelz.christianraylantieri.workers.dev (secret Sanity caricati). Mancano: chiavi Stripe/Resend/Brevo/Turnstile in produzione, dominio e DNS, Stripe live, Lighthouse.

@@ -12,6 +12,7 @@ import {homedir} from 'node:os'
 import {fileURLToPath} from 'node:url'
 import {createClient} from '@sanity/client'
 import {DRAFT_PAGES} from './pages.ts'
+import {textToBlocks} from './blocks.ts'
 
 const cliConfig = JSON.parse(readFileSync(`${homedir()}/.config/sanity/config.json`, 'utf8')) as {authToken?: string}
 if (!cliConfig.authToken) throw new Error('Fai prima `npx sanity login`.')
@@ -242,31 +243,6 @@ async function seedProducts(categoryIds: Record<string, string>) {
     })
     console.log(`+ prodotto ${p.title}`)
   }
-}
-
-/** Converte il testo semplice delle bozze in Portable Text (h2, paragrafi, elenchi). */
-function textToBlocks(text: string) {
-  const blocks: Record<string, unknown>[] = []
-  let n = 0
-  const block = (style: string, content: string, extra: Record<string, unknown> = {}) => {
-    n++
-    blocks.push({
-      _type: 'block',
-      _key: `b${n}`,
-      style,
-      markDefs: [],
-      children: [{_type: 'span', _key: `b${n}s`, text: content, marks: []}],
-      ...extra,
-    })
-  }
-  for (const line of text.split('\n')) {
-    const t = line.trim()
-    if (!t) continue
-    if (t.startsWith('## ')) block('h2', t.slice(3))
-    else if (t.startsWith('- ')) block('normal', t.slice(2), {listItem: 'bullet', level: 1})
-    else block('normal', t)
-  }
-  return blocks
 }
 
 async function seedDraftPages() {
