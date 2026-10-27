@@ -24,7 +24,7 @@ E-commerce di frenzjewelz.it. Astro 7 (on-demand su Cloudflare Workers) + Sanity
 
 Requisiti: Node 22.12+.
 
-> **Se il progetto sta in una cartella iCloud** (Desktop, Documenti): macOS può "ottimizzare lo spazio" e scaricare dal disco i file di `node_modules`, e Node resta appeso. Su questo Mac le dipendenze stanno fuori dal progetto, in `~/.cache/frenz-website/{site,sanity}/node_modules`, con `node_modules` come symlink (fuori da iCloud e fuori dalla scansione di Vite; non in `~/Library/Caches`, che macOS svuota da solo). Dopo un `rm -rf node_modules` rifare: `npm ci && mv node_modules ~/.cache/frenz-website/site/node_modules && ln -s ~/.cache/frenz-website/site/node_modules node_modules` (idem in `sanity/`). Meglio ancora: tenere il repo fuori da iCloud.
+> **Il repo vive in `~/Developer/frenz-website`, fuori da iCloud.** Sul Desktop (sincronizzato con iCloud) macOS scaricava i file dal disco e duplicava file in conflitto (`index 2.astro`), bloccando il server. Le dipendenze restano in `~/.cache/frenz-website/{site,sanity}/node_modules` con `node_modules` come symlink.
 
 ### 1. Sanity
 
@@ -145,6 +145,6 @@ Lo stock scala da solo a ogni ordine. Per togliere un prodotto dalla vendita sen
 
 - [x] **Fase 1, fondamenta**: progetto Sanity `d2cmi1jx` (org Ctrl Studio, dataset privato), seed caricato, prodotto di test visibile in `/shop` in locale. Studio online su frenzjewelz.sanity.studio.
 - [ ] Fase 2, catalogo
-- [~] **Fase 3, checkout**: codice completo (carrello, `/api/checkout`, webhook, email, pagine di ritorno). Da testare con chiavi Stripe di test.
+- [x] **Fase 3, checkout**: collaudato in sandbox il 27/10/2026 (ordine FJ-261027-YCKP: ordine in Studio, stock scalato, email Gmail, webhook ripetuto non duplica). Ritorno da Stripe sullo stesso host del checkout.
 - [~] **Fase 4**: form su misura e pagine legali/info compilate con i dati di Daniela B. Gioielleria Artigiana (restano tra [PARENTESI] corriere, tempi, IVA, servizio email). Newsletter tolta su richiesta di FRENZ.
 - [~] Fase 5: sitemap, robots, redirect Aruba, analytics (con token) e **deploy di prova** su https://frenz-jewelz.christianraylantieri.workers.dev (secret Sanity caricati). Mancano: chiavi Stripe/Resend/Brevo/Turnstile in produzione, dominio e DNS, Stripe live, Lighthouse.

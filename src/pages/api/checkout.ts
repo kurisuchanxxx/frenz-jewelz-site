@@ -1,5 +1,4 @@
 import type {APIRoute} from 'astro'
-import {PUBLIC_SITE_URL} from 'astro:env/client'
 import {getStripe} from '../../lib/stripe'
 import {getSanityFresh} from '../../lib/sanity-write'
 import {urlFor} from '../../lib/sanity'
@@ -109,7 +108,8 @@ export const POST: APIRoute = async ({request}) => {
     },
   }))
 
-  const site = PUBLIC_SITE_URL ?? new URL(request.url).origin
+  // Ritorno da Stripe sullo stesso host da cui parte il checkout (preview, dominio o localhost).
+  const site = new URL(request.url).origin
 
   try {
     const session = await getStripe().checkout.sessions.create({
