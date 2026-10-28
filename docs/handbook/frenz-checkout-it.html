@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>FJ2A-03-BLOCK I-(1) Manuale operativo Frenz Jewelz, pagina 2.1-1</title>
+<style>
+  /* ---------- fonts (files in ./fonts, copied from the skill's assets/fonts) ---------- */
+  /* Leroy-template lettering for every drawing label. */
+  @font-face { font-family: "Routed Gothic"; src: url("fonts/routed-gothic.ttf"); unicode-range: U+0000-0030, U+0032-FFFF; }
+  @font-face { font-family: "Routed Gothic Narrow"; src: url("fonts/routed-gothic-narrow.ttf"); unicode-range: U+0000-0030, U+0032-FFFF; }
+  /* Leroy's plain "1" reads as "I" (API V1, T1). Borrow a flagged one. Delete these two
+     rules for a strictly period look on pages without versions or subscripts. */
+  @font-face { font-family: "Routed Gothic"; src: local("Helvetica Neue"), local("HelveticaNeue"), local("Arial"); unicode-range: U+0031; }
+  @font-face { font-family: "Routed Gothic Narrow"; src: local("Helvetica Neue"), local("HelveticaNeue"), local("Arial"); unicode-range: U+0031; }
+  /* IBM Selectric Letter Gothic: crew checklists only. */
+  @font-face { font-family: "Letter Gothic"; src: url("fonts/LetterGothicCode-R.ttf"); font-weight: 400; }
+  @font-face { font-family: "Letter Gothic"; src: url("fonts/LetterGothicCode-B.ttf"); font-weight: 700; }
+
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #8a8a86; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  @media print { html, body { background: none; } }
+
+  :root {
+    --ink: #000000;
+    --paper: #fbfaf5;   /* screen only; print is pure white (below) */
+    --type: "Iowan Old Style", "Iowan", Georgia, serif;
+    --leroy: "Routed Gothic Narrow", "Routed Gothic", sans-serif;
+    --selectric: "Letter Gothic", "Courier", monospace;
+  }
+  /* Must come after :root. A printed off-white tint is halftoned into dots. */
+  @media print { :root { --paper: #ffffff; } }
+
+  .page {
+    position: relative;
+    width: 210mm;
+    height: 297mm;
+    margin: 0 auto;
+    padding: 9mm 15mm 0 16mm;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--type);
+    font-size: 8pt;
+    line-height: 1.33;
+    letter-spacing: 0.055em;   /* the Selectric typewriter spacing */
+    overflow: hidden;
+  }
+
+  /* ---------- running head / foot ---------- */
+  .head { text-align: center; line-height: 1.25; }
+  .head .doc { font-weight: 700; font-size: 8.6pt; letter-spacing: 0.06em; }
+  .head .title { font-weight: 700; font-size: 8.6pt; letter-spacing: 0.08em; }
+  .head .part { margin-top: 2.2mm; font-size: 8.2pt; letter-spacing: 0.1em; }
+  .rule { height: 0; border-top: 1.5pt solid var(--ink); margin: 1.4mm -2mm 0; }
+
+  .foot { position: absolute; left: 16mm; right: 15mm; bottom: 8mm; }
+  .foot .rule { margin: 0 -2mm 1.6mm; }
+  .foot .sub { text-align: center; letter-spacing: 0.1em; font-size: 8.2pt; }
+  .foot .line { display: flex; align-items: baseline; justify-content: space-between; margin-top: 2.2mm; font-size: 8.2pt; }
+  .foot .fill { display: inline-block; border-bottom: 0.6pt solid var(--ink); text-align: center; padding: 0 1mm; font-size: 8.8pt; letter-spacing: 0.03em; }
+
+  /* ---------- section opener ---------- */
+  .opener { text-align: center; letter-spacing: 0.12em; margin: 3.4mm 0 2mm; line-height: 1.6; }
+
+  /* ---------- numbered paragraphs ---------- */
+  .para { display: grid; grid-template-columns: 19mm 1fr; position: relative; }
+  .para .num { letter-spacing: 0.08em; }
+  .para h2, .para h3 { margin: 0 0 0.8mm; font: inherit; font-weight: 400; letter-spacing: 0.08em; }
+  .para h3 { text-decoration: underline; text-underline-offset: 1.6pt; text-decoration-thickness: 0.5pt; letter-spacing: 0.06em; }
+  .para p { margin: 0 0 1mm; text-indent: 9mm; text-align: left; }
+  .para p.flush { text-indent: 0; }
+  .changebar { position: absolute; left: -9mm; width: 1.3mm; background: var(--ink); }
+  .nowrap { white-space: nowrap; }
+
+  /* ---------- figures ---------- */
+  figure { margin: 1.6mm 0 0; }
+  figure svg { display: block; width: 100%; height: auto; }
+  figcaption { text-align: center; margin-top: 0.6mm; letter-spacing: 0.07em; }
+  figcaption .n { margin-right: 3mm; }
+
+  /* SVG units are millimetres on paper: a figure 180 units wide fills the 179 mm column. */
+  svg text { font-family: var(--leroy); fill: var(--ink); letter-spacing: 0.04px; }
+  svg .o    { fill: none; stroke: var(--ink); stroke-width: 0.42; stroke-linejoin: round; stroke-linecap: round; } /* object line */
+  svg .of   { fill: var(--paper); stroke: var(--ink); stroke-width: 0.42; stroke-linejoin: round; }               /* object, opaque */
+  svg .t    { fill: none; stroke: var(--ink); stroke-width: 0.17; stroke-linecap: round; }                        /* thin detail */
+  svg .hid  { fill: none; stroke: var(--ink); stroke-width: 0.22; stroke-dasharray: 1.3 0.7; }                     /* hidden */
+  svg .cl   { fill: none; stroke: var(--ink); stroke-width: 0.16; stroke-dasharray: 5 0.8 0.9 0.8; }               /* centerline */
+  svg .cut  { fill: none; stroke: var(--ink); stroke-width: 0.5; stroke-dasharray: 5 1 1 1; }                      /* section cut */
+  svg .ld   { fill: none; stroke: var(--ink); stroke-width: 0.16; marker-end: url(#nh-leader); }                   /* leader */
+  svg .dim  { fill: none; stroke: var(--ink); stroke-width: 0.16; marker-start: url(#nh-dim); }                    /* dimension half */
+  svg .w    { fill: none; stroke: var(--ink); stroke-width: 0.3; stroke-linejoin: round; }                         /* wire */
+  svg .wa   { fill: none; stroke: var(--ink); stroke-width: 0.3; stroke-linejoin: round; marker-end: url(#nh-arrow); } /* wire with arrow */
+  svg .box  { fill: var(--paper); stroke: var(--ink); stroke-width: 0.45; }
+  svg .panel{ fill: none; stroke: var(--ink); stroke-width: 0.3; stroke-dasharray: 2 1; }
+  svg .ev   { fill: none; stroke: var(--ink); stroke-width: 0.18; stroke-dasharray: 1 0.7; }                       /* timeline event */
+  svg .vid  { fill: url(#nh-hatch); stroke: var(--ink); stroke-width: 0.35; }                                      /* hatched bar */
+  svg .aud  { fill: var(--paper); stroke: var(--ink); stroke-width: 0.35; }                                        /* plain bar */
+  svg .gap  { fill: var(--paper); stroke: var(--ink); stroke-width: 0.35; stroke-dasharray: 0.6 0.5; }             /* dotted bar */
+  svg .grain{ fill: url(#nh-dots); stroke: var(--ink); stroke-width: 0.35; }                                       /* granular, powder, fill */
+  svg .dot  { fill: var(--ink); }
+  svg .lbl   { font-size: 2.35px; }                                         /* callouts, box titles */
+  svg .lbl-s { font-size: 2.05px; }                                         /* secondary lines, wire names */
+  svg .lbl-b { font-size: 2.5px; font-family: "Routed Gothic", sans-serif; } /* view titles, big letters */
+  svg .code  { font-size: 2.4px; font-family: "Routed Gothic", sans-serif; } /* figure code, bottom right */
+
+  /* ---------- lower band: data table + notice + checklist ---------- */
+  .lower { display: grid; grid-template-columns: 1fr 64mm; column-gap: 6mm; margin-top: 2.8mm; }
+  .tcap { text-align: center; letter-spacing: 0.07em; margin: 0 0 0.8mm; }
+  table { width: 100%; border-collapse: collapse; font-size: 7.3pt; line-height: 1.2; }
+  th, td { border: 0.6pt solid var(--ink); padding: 0.35mm 1.6mm; text-align: left; vertical-align: top; font-weight: 400; }
+  thead th { text-align: center; letter-spacing: 0.1em; padding: 0.5mm 1.6mm; }
+  td.v { white-space: nowrap; }
+
+  .notice { text-align: left; margin-bottom: 1.8mm; }
+  .notice .tag { display: block; text-align: center; letter-spacing: 0.18em; font-weight: 700; text-decoration: underline; text-underline-offset: 1.6pt; text-decoration-thickness: 0.6pt; margin-bottom: 0.8mm; }
+  .notice p { margin: 0; font-size: 7.4pt; line-height: 1.28; }
+
+  .card { border: 0.8pt solid var(--ink); font-family: var(--selectric); font-size: 7.1pt; line-height: 1.3; letter-spacing: 0; }
+  .card .bar { background: var(--ink); color: var(--paper); font-weight: 700; padding: 0.5mm 1.8mm; display: flex; justify-content: space-between; }
+  .card ol { list-style: none; margin: 0; padding: 0.8mm 1.8mm 1mm; }
+  .card li { display: grid; grid-template-columns: 3.2mm 1fr; white-space: pre; }
+
+  /* black thumb tab, bleeds off the trim edge */
+  .tab { position: absolute; right: 0; top: 112mm; width: 8.5mm; height: 17mm; background: var(--ink); color: var(--paper);
+    font-family: "Routed Gothic", sans-serif; font-size: 8pt; letter-spacing: 0.08em; display: flex; align-items: center; justify-content: center; }
+</style>
+</head>
+<body>
+
+<!-- Shared drawing defs: every figure on the page uses these ids. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="nh-leader" viewBox="0 0 6 4" refX="5.6" refY="2" markerWidth="2.1" markerHeight="1.05" markerUnits="userSpaceOnUse" orient="auto" preserveAspectRatio="none"><path d="M0,0 L6,2 L0,4 Z" fill="#000"/></marker>
+    <marker id="nh-arrow" viewBox="0 0 6 4" refX="5.6" refY="2" markerWidth="2.4" markerHeight="1.3" markerUnits="userSpaceOnUse" orient="auto" preserveAspectRatio="none"><path d="M0,0 L6,2 L0,4 Z" fill="#000"/></marker>
+    <marker id="nh-dim" viewBox="0 0 6 4" refX="0" refY="2" markerWidth="2.2" markerHeight="0.95" markerUnits="userSpaceOnUse" orient="auto" preserveAspectRatio="none"><path d="M6,0 L0,2 L6,4 Z" fill="#000"/></marker>
+    <pattern id="nh-hatch" width="1.1" height="1.1" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="1.1" stroke="#000" stroke-width="0.2"/></pattern>
+    <pattern id="nh-bp" width="1.4" height="1.4" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)"><rect width="0.7" height="1.4" fill="#000"/></pattern>
+    <pattern id="nh-dots" width="1.3" height="1.3" patternUnits="userSpaceOnUse"><circle cx="0.32" cy="0.32" r="0.15" fill="#000"/><circle cx="0.97" cy="0.97" r="0.15" fill="#000"/></pattern>
+  </defs>
+</svg>
+
+<div class="page">
+
+  <header class="head">
+    <div class="doc">FJ2A-03-BLOCK I-(1)</div>
+    <div class="title">MANUALE OPERATIVO FRENZ JEWELZ</div>
+    <div class="part">DATI DI SISTEMA</div>
+    <div class="rule"></div>
+  </header>
+
+  <div class="tab">CHK</div>
+
+  <div class="opener">
+    SEZIONE 2 &nbsp;&nbsp;&middot;&nbsp;&nbsp; SOTTOSEZIONE 2.1<br>
+    SOTTOSISTEMA DI CHECKOUT E ORDINI
+  </div>
+
+  <section class="para">
+    <div class="num">2.1.1</div>
+    <div>
+      <h2>INTRODUZIONE.</h2>
+      <p>Il sottosistema trasforma il carrello del browser in un ordine registrato in Sanity. Il client invia solo identificativi e quantità: prezzi, disponibilità e spedizione sono ricalcolati dal server, e l’ordine nasce una sola volta, dal webhook di Stripe (figura 2.1-1).</p>
+    </div>
+  </section>
+
+  <!-- ===== FIGURE 2.1-1: functional block diagram ===== -->
+  <figure>
+    <svg viewBox="0 -4 180 70" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schema funzionale: browser, Worker Cloudflare, Stripe, Sanity e Gmail">
+      <!-- BROWSER -->
+      <rect class="panel" x="1.5" y="2.5" width="38" height="61"/>
+      <text class="lbl-s" x="3.4" y="5.6">BROWSER DEL CLIENTE</text>
+      <rect class="box" x="5" y="9" width="31" height="14"/>
+      <text class="lbl" x="20.5" y="13.2" text-anchor="middle">CARRELLO</text>
+      <text class="lbl-s" x="20.5" y="16.4" text-anchor="middle">LOCALSTORAGE</text>
+      <text class="lbl-s" x="20.5" y="19.1" text-anchor="middle">CHIAVE "FRENZ-CART"</text>
+      <rect class="box" x="5" y="42" width="31" height="13"/>
+      <text class="lbl" x="20.5" y="46.6" text-anchor="middle">PAGINA PRODOTTO</text>
+      <text class="lbl-s" x="20.5" y="49.8" text-anchor="middle">MAXQUANTITY()</text>
+      <text class="lbl-s" x="20.5" y="52.5" text-anchor="middle">AVAILABILITY.TS</text>
+      <line class="wa" x1="20.5" y1="42" x2="20.5" y2="23.4"/>
+      <text class="lbl-s" transform="translate(19.6 39.4) rotate(-90)">AGGIUNGI (MAX)</text>
+
+      <!-- redirect to Stripe, over the top -->
+      <polyline class="wa" points="30,9 30,-1.6 158,-1.6 158,6.6"/>
+      <text class="lbl-s" x="60" y="-2.4">REDIRECT ALLA PAGINA DI PAGAMENTO STRIPE</text>
+
+      <!-- WORKER -->
+      <rect class="panel" x="51" y="2.5" width="61" height="61"/>
+      <text class="lbl-s" x="52.9" y="5.6">CLOUDFLARE WORKER · ASTRO 7 SSR</text>
+      <rect class="box" x="55" y="9" width="51" height="17"/>
+      <text class="lbl" x="80.5" y="13.2" text-anchor="middle">POST /API/CHECKOUT</text>
+      <text class="lbl-s" x="80.5" y="16.4" text-anchor="middle">RICALCOLO PREZZI E STOCK</text>
+      <text class="lbl-s" x="80.5" y="19.1" text-anchor="middle">SPEDIZIONE DA IMPOSTAZIONI SITO</text>
+      <text class="lbl-s" x="80.5" y="21.8" text-anchor="middle">NESSUN PREZZO DAL CLIENT</text>
+      <rect class="box" x="55" y="36" width="51" height="17"/>
+      <text class="lbl" x="80.5" y="40.2" text-anchor="middle">POST /API/STRIPE-WEBHOOK</text>
+      <text class="lbl-s" x="80.5" y="43.4" text-anchor="middle">VERIFICA FIRMA SUL BODY GREZZO</text>
+      <text class="lbl-s" x="80.5" y="46.1" text-anchor="middle">ORDINE + STOCK IN UNA TRANSAZIONE</text>
+      <text class="lbl-s" x="80.5" y="48.8" text-anchor="middle">POI 2 EMAIL</text>
+
+      <!-- cart <-> checkout -->
+      <line class="wa" x1="36" y1="13" x2="54.6" y2="13"/>
+      <text class="lbl-s" x="41.2" y="12.2">ID + QTÀ</text>
+      <line class="wa" x1="55" y1="19.5" x2="36.4" y2="19.5"/>
+      <text class="lbl-s" x="41.2" y="18.7">URL</text>
+
+      <!-- STRIPE -->
+      <rect class="panel" x="124" y="2.5" width="54" height="18"/>
+      <text class="lbl-s" x="125.9" y="5.6">STRIPE</text>
+      <rect class="box" x="137" y="7" width="38" height="11"/>
+      <text class="lbl" x="156" y="11.2" text-anchor="middle">CHECKOUT SESSION</text>
+      <text class="lbl-s" x="156" y="14.4" text-anchor="middle">30 MIN · SOLO IT · TERMINI</text>
+      <line class="wa" x1="106" y1="13" x2="136.6" y2="13"/>
+      <text class="lbl-s" x="114" y="12.2">SESSIONE</text>
+
+      <!-- Stripe -> webhook -->
+      <polyline class="wa" points="168,18 168,40 106.4,40"/>
+      <text class="lbl-s" x="139" y="39.2">CHECKOUT.SESSION.COMPLETED</text>
+
+      <!-- SANITY drum -->
+      <path class="box" d="M125,47 L125,58.6 A9.5,1.8 0 0 0 144,58.6 L144,47"/>
+      <ellipse class="box" cx="134.5" cy="47" rx="9.5" ry="1.8"/>
+      <text class="lbl-b" x="134.5" y="52.6" text-anchor="middle">SANITY</text>
+      <text class="lbl-s" x="134.5" y="55.4" text-anchor="middle">DATASET PRIVATO</text>
+
+      <!-- checkout reads Sanity -->
+      <polyline class="wa" points="134.5,45.2 134.5,43 117,43 117,23 106.4,23"/>
+      <text class="lbl-s" transform="translate(116.2 37.4) rotate(-90)">SENZA CDN</text>
+      <!-- webhook writes Sanity -->
+      <line class="wa" x1="106" y1="50" x2="124.6" y2="50"/>
+      <text class="lbl-s" x="114" y="49.2">ORDINE</text>
+
+      <!-- GMAIL -->
+      <rect class="box" x="154" y="47" width="24" height="11"/>
+      <text class="lbl" x="166" y="51.4" text-anchor="middle">GMAIL SMTP</text>
+      <text class="lbl-s" x="166" y="54.6" text-anchor="middle">CLIENTE, FRENZ</text>
+      <polyline class="wa" points="80.5,53 80.5,62.4 166,62.4 166,58.4"/>
+      <text class="lbl-s" x="83" y="61.6">CONFERMA E NOTIFICA</text>
+
+      <text class="code" x="178.6" y="65.4" text-anchor="end">CHK-501A</text>
+    </svg>
+    <figcaption><span class="n">Figura 2.1-1.</span>Schema funzionale del checkout e della registrazione dell’ordine</figcaption>
+  </figure>
+
+  <section class="para" style="margin-top:2.2mm">
+    <div class="num">2.1.2</div>
+    <div>
+      <h2>DESCRIZIONE FUNZIONALE.</h2>
+      <p>Il carrello invia a POST /api/checkout al massimo 20 righe id e quantità. L’endpoint rilegge prodotti e Impostazioni sito da Sanity senza CDN, limita le quantità con maxQuantity(), applica la soglia di spedizione gratuita e crea una Checkout Session Stripe di 30 minuti. A pagamento riuscito Stripe chiama il webhook, che registra l’ordine, scala lo stock e invia due email (figura 2.1-2).</p>
+    </div>
+  </section>
+
+  <section class="para">
+    <div class="changebar" style="top:0.4mm; height:6.8mm"></div>
+    <div class="num">2.1.2.1</div>
+    <div>
+      <h3>Idempotenza dell’ordine.</h3>
+      <p class="flush">L’ordine ha <span class="nowrap">_id = order-&lt;sessione&gt;</span> e nasce con create nella stessa transazione che scala lo stock: a un rinvio dell’evento la transazione fallisce intera e lo stock non scende due volte.</p>
+    </div>
+  </section>
+
+  <!-- ===== FIGURE 2.1-2: webhook sequence + order document ===== -->
+  <figure>
+    <svg viewBox="0 0 180 49" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sequenza del webhook con rinvio dell’evento e documento ordine">
+      <text class="lbl-b" x="14" y="3.2" text-anchor="middle">STRIPE</text>
+      <text class="lbl-b" x="60" y="3.2" text-anchor="middle">WEBHOOK</text>
+      <text class="lbl-b" x="106" y="3.2" text-anchor="middle">SANITY</text>
+      <line class="w" x1="14" y1="4.6" x2="14" y2="46"/>
+      <line class="w" x1="60" y1="4.6" x2="60" y2="46"/>
+      <line class="w" x1="106" y1="4.6" x2="106" y2="46"/>
+
+      <line class="wa" x1="14" y1="9.4" x2="59.6" y2="9.4"/>
+      <text class="lbl-s" x="37" y="8.6" text-anchor="middle">CHECKOUT.SESSION.COMPLETED</text>
+      <line class="wa" x1="60" y1="14" x2="105.6" y2="14"/>
+      <text class="lbl-s" x="83" y="13.2" text-anchor="middle">ESISTE ORDER-&lt;SESSIONE&gt;?</text>
+      <line class="wa" x1="106" y1="18.2" x2="60.4" y2="18.2"/>
+      <text class="lbl-s" x="83" y="17.4" text-anchor="middle">NO</text>
+      <line class="wa" x1="60" y1="22.8" x2="105.6" y2="22.8"/>
+      <text class="lbl-s" x="83" y="22" text-anchor="middle">TX: CREATE ORDINE + PATCH STOCK</text>
+      <line class="wa" x1="60" y1="27.2" x2="14.4" y2="27.2"/>
+      <text class="lbl-s" x="37" y="26.4" text-anchor="middle">200 OK</text>
+
+      <line class="ev" x1="2" y1="30.4" x2="118" y2="30.4"/>
+
+      <line class="wa" x1="14" y1="34.6" x2="59.6" y2="34.6"/>
+      <text class="lbl-s" x="37" y="33.8" text-anchor="middle">RINVIO DELLO STESSO EVENTO</text>
+      <line class="wa" x1="60" y1="38.8" x2="105.6" y2="38.8"/>
+      <text class="lbl-s" x="83" y="38" text-anchor="middle">ESISTE ORDER-&lt;SESSIONE&gt;?  SÌ</text>
+      <line class="wa" x1="60" y1="43.2" x2="14.4" y2="43.2"/>
+      <text class="lbl-s" x="37" y="42.4" text-anchor="middle">200 "GIÀ REGISTRATO"</text>
+
+      <!-- DETAIL A -->
+      <line class="t" x1="123.4" y1="0" x2="123.4" y2="47"/>
+      <text class="lbl-b" x="126" y="3.2">DETTAGLIO A: DOCUMENTO ORDINE</text>
+      <rect class="box" x="126" y="6" width="52" height="24"/>
+      <line class="t" x1="146" y1="6" x2="146" y2="30"/>
+      <g class="t">
+        <line x1="126" y1="10.8" x2="178" y2="10.8"/><line x1="126" y1="15.6" x2="178" y2="15.6"/>
+        <line x1="126" y1="20.4" x2="178" y2="20.4"/><line x1="126" y1="25.2" x2="178" y2="25.2"/>
+      </g>
+      <g class="lbl-s">
+        <text x="127.4" y="9.2">_ID</text><text x="147.4" y="9.2">ORDER-&lt;SESSIONE&gt;</text>
+        <text x="127.4" y="14">ORDERNUMBER</text><text x="147.4" y="14">FJ-AAMMGG-XXXX</text>
+        <text x="127.4" y="18.8">STATUS</text><text x="147.4" y="18.8">PAGATO | DAVERIFICARE</text>
+        <text x="127.4" y="23.6">ITEMS[]</text><text x="147.4" y="23.6">TITOLO, QTÀ, PREZZO</text>
+        <text x="127.4" y="28.4">TOTAL</text><text x="147.4" y="28.4">CENTESIMI, DA STRIPE</text>
+      </g>
+      <g class="lbl-s">
+        <text x="126" y="34.6">_ID FISSO: UN SOLO ORDINE PER SESSIONE.</text>
+        <text x="126" y="37.4">STOCK INSUFFICIENTE: STATO DAVERIFICARE,</text>
+        <text x="126" y="40.2">AVVISO A FRENZ, RIMBORSO DA STRIPE.</text>
+      </g>
+
+      <text class="code" x="178.6" y="48.4" text-anchor="end">CHK-502A</text>
+    </svg>
+    <figcaption><span class="n">Figura 2.1-2.</span>Sequenza del webhook con rinvio dell’evento</figcaption>
+  </figure>
+
+  <div class="lower">
+    <div>
+      <section class="para">
+        <div class="num">2.1.3</div>
+        <div><h2>DATI DI PRESTAZIONE E DI PROGETTO.</h2></div>
+      </section>
+      <div class="tcap">Tabella 2.1-1. Dati del checkout</div>
+      <table>
+        <thead><tr><th>Parametro</th><th>Valore</th></tr></thead>
+        <tbody>
+          <tr><td>Righe per carrello</td><td class="v">max 20</td></tr>
+          <tr><td>Quantità per riga</td><td class="v">1 pezzo unico, altri max 5</td></tr>
+          <tr><td>Durata Checkout Session</td><td class="v">30 min</td></tr>
+          <tr><td>Paesi di spedizione</td><td class="v">solo IT</td></tr>
+          <tr><td>Prezzi</td><td class="v">EUR, centesimi interi</td></tr>
+          <tr><td>Numero ordine</td><td class="v">FJ-AAMMGG-XXXX</td></tr>
+          <tr><td>Email per ordine</td><td class="v">2 (cliente, FRENZ)</td></tr>
+          <tr><td>Limite invio Gmail</td><td class="v">circa 500 al giorno</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div class="notice">
+        <span class="tag">ATTENZIONE</span>
+        <p>Un pezzo unico può essere pagato due volte nei 30 minuti di sessione: il secondo ordine nasce «da verificare» e va rimborsato.</p>
+      </div>
+      <div class="card">
+        <div class="bar"><span>COLLAUDO CHECKOUT</span><span>CTRL</span></div>
+        <ol>
+          <li><span>1</span><span>STRIPE LISTEN - avviare</span></li>
+          <li><span>2</span><span>CARRELLO - aggiungere un pezzo</span></li>
+          <li><span>3</span><span>VAI AL CHECKOUT - premere</span></li>
+          <li><span>4</span><span>CARTA - 4242 4242 4242 4242</span></li>
+          <li><span></span><span>√ ORDINE - in Da gestire, stock -1</span></li>
+          <li><span>5</span><span>EVENTO - rinviare</span></li>
+          <li><span></span><span>√ ORDINE - non duplicato</span></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <footer class="foot">
+    <div class="rule"></div>
+    <div class="sub">SOTTOSISTEMA DI CHECKOUT E ORDINI</div>
+    <div class="line">
+      <span>Missione <span class="fill" style="width:12mm">&nbsp;</span></span>
+      <span>Data emissione <span class="fill" style="width:31mm">23 settembre 2026</span></span>
+      <span>Data revisione <span class="fill" style="width:31mm">27 ottobre 2026</span></span>
+      <span>Pagina <span class="fill" style="width:16mm">2.1-1</span></span>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  // Fit check: room left between the last content block and the footer.
+  // .page hides overflow, so without this an overfull page fails silently.
+  // render.sh prints the result from <html data-fit>.
+  document.fonts.ready.then(() => {
+    const page = document.querySelector('.page')
+    const foot = page.querySelector('.foot')
+    let bottom = 0
+    for (const el of page.children) {
+      if (el === foot || el.classList.contains('tab')) continue
+      bottom = Math.max(bottom, el.getBoundingClientRect().bottom)
+    }
+    const free = (foot.getBoundingClientRect().top - bottom) * 25.4 / 96
+    document.documentElement.dataset.fit = free >= 0 ? `ok, ${free.toFixed(1)} mm free above the footer` : `OVERFLOW by ${(-free).toFixed(1)} mm`
+  })
+</script>
+</body>
+</html>
