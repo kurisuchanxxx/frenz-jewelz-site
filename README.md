@@ -100,6 +100,28 @@ Il comando stampa un `whsec_…`: va in `STRIPE_WEBHOOK_SECRET`. In produzione s
 
 Test: carta `4242 4242 4242 4242`, qualsiasi data futura e CVC. Dopo il pagamento: ordine in Studio → Ordini → Da gestire, stock scalato, due email. Rilanciando lo stesso evento (`stripe events resend <id>`) l'ordine non si duplica.
 
+## DNS e dominio (frenzjewelz.it)
+
+Registrar: Aruba. Il sito gira su un Worker Cloudflare, quindi la zona DNS deve stare su Cloudflare (nameserver Cloudflare); la **posta resta su Aruba**.
+
+Record di posta rilevati il 03/11/2026 sui DNS Aruba, da ricreare identici su Cloudflare, tutti **Solo DNS** (nuvola grigia, mai proxy):
+
+| Tipo | Nome | Valore |
+|---|---|---|
+| MX | `@` | `mx.frenzjewelz.it` priorità 10 |
+| A | `mx` | 62.149.128.151, .154, .157, .160, .163, .166, 62.149.128.74 |
+| A | `mail` | 62.149.128.151, .154, .157, .160, .163, .166, 62.149.128.74 |
+| A | `smtp` | 62.149.128.200, .201, .202, .203 |
+| A | `pop3` | 62.149.128.73, .75, .152, .155, .158, .161, .164, .167 |
+| CNAME | `imap` | `imaps.aruba.it` |
+| A | `webmail` | 62.149.158.91, 62.149.158.92 |
+| CNAME | `autoconfig` | `autodiscover.aruba.it` |
+| CNAME | `admin` | `admin.redirect.aruba.it` |
+| TXT | `@` | `v=spf1 include:_spf.aruba.it ~all` |
+| TXT | `_dmarc` | `v=DMARC1; p=none; adkim=r; aspf=r;` |
+
+Da **non** ricreare (vecchio sito Aruba): `A @ 62.149.128.40`, `www`, `ftp`. Al loro posto il Worker con dominio personalizzato `frenzjewelz.it` e `www.frenzjewelz.it`.
+
 ## Variabili d'ambiente
 
 | Nome | Dove | A cosa serve |
