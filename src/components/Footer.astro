@@ -43,7 +43,11 @@ const LEGAL = [
       </div>
     </div>
 
-    <p class="wordmark" aria-hidden="true">FRENZ JEWELZ</p>
+    {/* Wordmark a tutta larghezza: SVG con textLength, così riempie esattamente il contenitore
+        da bordo a bordo su ogni schermo e con qualsiasi font di sistema. */}
+    <svg class="wordmark" viewBox="0 0 1000 104" aria-hidden="true" focusable="false">
+      <text x="0" y="100" textLength="1000" lengthAdjust="spacingAndGlyphs">FRENZ JEWELZ</text>
+    </svg>
 
     <div class="footer__bottom">
       <span>
@@ -90,13 +94,18 @@ const LEGAL = [
   }
 
   .wordmark {
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: clamp(3rem, 13.5vw, 13rem);
-    line-height: 0.85;
-    letter-spacing: -0.04em;
-    white-space: nowrap;
+    display: block;
+    width: 100%;
+    height: auto;
     margin: clamp(3rem, 8vw, 6rem) 0 1.5rem;
+    overflow: visible;
+  }
+
+  .wordmark text {
+    font-family: var(--font-sans);
+    font-weight: 900;
+    font-size: 136px;
+    fill: var(--white);
   }
 
   .footer__bottom {
