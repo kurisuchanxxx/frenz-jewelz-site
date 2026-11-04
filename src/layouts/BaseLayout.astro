@@ -24,8 +24,11 @@ const isPreviewHost = Astro.url.hostname.endsWith('.workers.dev')
 const settings = await sanity.fetch<SiteSettings | null>(SETTINGS_QUERY)
 const fullTitle = title ? `${title} | Frenz Jewelz` : 'Frenz Jewelz | Gioielli in argento fatti a mano'
 const canonical = new URL(Astro.url.pathname, Astro.site)
-const image = ogImage ?? settings?.heroImages?.[0]
-const ogImageUrl = image ? urlFor(image).width(1200).height(630).format('jpg').url() : undefined
+// Anteprima social: la foto del prodotto se c'è, altrimenti l'immagine di marca in /public.
+const ogImageUrl = ogImage
+  ? urlFor(ogImage).width(1200).height(630).format('jpg').url()
+  : new URL('/og-image.jpg', Astro.site).href
+const ogImageAlt = ogImage?.alt ?? 'Frenz Jewelz, gioielli in argento 925 fatti a mano ad Ancona'
 ---
 
 <!doctype html>
@@ -37,8 +40,10 @@ const ogImageUrl = image ? urlFor(image).width(1200).height(630).format('jpg').u
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     {(noindex || isPreviewHost) && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta name="theme-color" content="#000000" />
     <link rel="preconnect" href="https://cdn.sanity.io" />
 
@@ -48,8 +53,14 @@ const ogImageUrl = image ? urlFor(image).width(1200).height(630).format('jpg').u
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogImageAlt} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
     <slot name="head" />
   </head>
   <body>
