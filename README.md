@@ -58,7 +58,7 @@ npm run check               # typecheck
 
 ```bash
 npx wrangler login
-PUBLIC_SITE_URL=https://frenzjewelz.it npm run deploy   # astro build && wrangler deploy
+PUBLIC_SITE_URL=https://frenzjewelz.it npm run deploy   # astro build && wrangler deploy (pubblica su frenzjewelz.it)
 ```
 
 `PUBLIC_SITE_URL` viene letto **al build** (URL canonico, sitemap, ritorno da Stripe): nel `.env` locale è `http://localhost:4321`, quindi al deploy va passato quello di produzione. Finché il dominio non è attivo, usare l'URL `*.workers.dev`.
@@ -169,4 +169,4 @@ Lo stock scala da solo a ogni ordine. Per togliere un prodotto dalla vendita sen
 - [ ] Fase 2, catalogo
 - [x] **Fase 3, checkout**: collaudato in sandbox il 27/10/2026 (ordine FJ-261027-YCKP: ordine in Studio, stock scalato, email Gmail, webhook ripetuto non duplica). Ritorno da Stripe sullo stesso host del checkout.
 - [~] **Fase 4**: form su misura e pagine legali/info compilate con i dati di Daniela B. Gioielleria Artigiana (restano tra [PARENTESI] corriere, tempi, IVA, servizio email). Newsletter tolta su richiesta di FRENZ.
-- [~] Fase 5: sitemap, robots, redirect Aruba, analytics (con token) e **deploy di prova** su https://frenz-jewelz.christianraylantieri.workers.dev (secret Sanity caricati). Mancano: chiavi Stripe/Resend/Brevo/Turnstile in produzione, dominio e DNS, Stripe live, Lighthouse.
+- [~] **Fase 5**: dominio frenzjewelz.it su Cloudflare (04/11/2026), nameserver Cloudflare, posta invariata su Aruba, Worker con custom domain (apex + www → apex), redirect Aruba verificati, `workers.dev` spento. Manca: Stripe live.

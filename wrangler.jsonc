@@ -9,6 +9,9 @@
   },
   // Dominio vero: Cloudflare crea da solo i record DNS e il certificato.
   // www viene reindirizzato all'indirizzo senza www da src/middleware.ts.
+  // Niente indirizzo *.workers.dev in produzione: con le chiavi live farebbe pagamenti veri.
+  "workers_dev": false,
+  "preview_urls": false,
   "routes": [
     {"pattern": "frenzjewelz.it", "custom_domain": true},
     {"pattern": "www.frenzjewelz.it", "custom_domain": true}
