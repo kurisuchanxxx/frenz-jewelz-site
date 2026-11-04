@@ -7,6 +7,12 @@
   "observability": {
     "enabled": true
   },
+  // Dominio vero: Cloudflare crea da solo i record DNS e il certificato.
+  // www viene reindirizzato all'indirizzo senza www da src/middleware.ts.
+  "routes": [
+    {"pattern": "frenzjewelz.it", "custom_domain": true},
+    {"pattern": "www.frenzjewelz.it", "custom_domain": true}
+  ],
   // Variabili non segrete. I segreti vanno con `npx wrangler secret put NOME` (vedi README).
   "vars": {
     "SANITY_DATASET": "production"
