@@ -7,6 +7,7 @@ Frenz Jewelz, e-commerce di gioielli (Ctrl Studio per FRENZ). Leggi README.md pe
 - Dataset privato: leggere sempre con il client di `src/lib/sanity.ts`.
 - Prezzi in centesimi interi. Disponibilità solo da `src/lib/availability.ts`. Il checkout ricalcola tutto lato server.
 - Testi del sito e dello Studio in italiano.
+- Font titoli Aerosoldier: il file `public/fonts/aerosoldier.woff2` è fuori da git (repo pubblico). **Non fare deploy con quel file finché FRENZ non ha comprato la licenza Commercial** (mansgreback.com): se non c'è licenza, spostalo fuori da `public/` prima di `wrangler deploy` e il sito ricade su Sedgwick Ave Display.
 - Verifica: `npm run check`, `npm run build`, e in `/sanity` `npx tsc --noEmit` + `npx sanity schema validate`.
 
 ## Development

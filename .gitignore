@@ -32,3 +32,6 @@ pnpm-debug.log*
 Frenz Foto/
 frenzjewelzwebp/
 04_FrenzJewelz/
+
+# Font con licenza (Aerosoldier): NON nel repo pubblico. Va messo a mano in public/fonts/ prima del deploy.
+public/fonts/

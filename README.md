@@ -139,6 +139,12 @@ Da **non** ricreare (vecchio sito Aruba): `A @ 62.149.128.40`, `www`, `ftp`. Al 
 
 Lo schema tipizzato è in `astro.config.mjs` (`env.schema`); nel codice si importano da `astro:env/server`.
 
+## Font dei titoli
+
+Aerosoldier di Måns Grebäck, versione Regular, ridotta ai caratteri latini e convertita in WOFF2 (`public/fonts/aerosoldier.woff2`, ~165 KB). È un font a pagamento: il file **non è nel repository** (pubblico) e va copiato a mano in `public/fonts/` su chi fa il deploy. Per l'uso sul sito serve la licenza **Commercial** (fino a 10.000 visualizzazioni di pagina al mese). Senza il file, i titoli usano Sedgwick Ave Display (Google Fonts, gratuito).
+
+Stato licenza: **da acquistare** (05/11/2026).
+
 ## Chi gestisce cosa (handoff a FRENZ)
 
 | Cosa | Dove |
