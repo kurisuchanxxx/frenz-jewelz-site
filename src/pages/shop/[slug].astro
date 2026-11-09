@@ -91,6 +91,7 @@ const jsonLd = {
         data-product-slug={product.slug}
         data-product-title={product.title}
         data-product-price={product.price}
+        data-product-category={product.category?.title}
         data-product-image={product.images?.[0] ? urlFor(product.images[0]).width(144).height(180).url() : undefined}
         data-max-quantity={maxQuantity(product)}
         disabled={!purchasable}
@@ -133,6 +134,21 @@ const jsonLd = {
     </div>
   </div>
 </BaseLayout>
+
+<script>
+  import {gaItem, track} from '../../lib/analytics'
+
+  // Scheda prodotto vista (Google Analytics, solo con consenso). I dati sono quelli del bottone.
+  const d = document.querySelector<HTMLButtonElement>('[data-add-to-cart]')?.dataset
+  if (d?.productId) {
+    const price = Number(d.productPrice)
+    track('view_item', {
+      currency: 'EUR',
+      value: price / 100,
+      items: [gaItem({id: d.productId, name: d.productTitle ?? '', price, category: d.productCategory})],
+    })
+  }
+</script>
 
 <style>
   .product {

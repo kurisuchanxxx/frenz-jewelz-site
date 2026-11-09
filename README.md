@@ -135,13 +135,31 @@ Da **non** ricreare (vecchio sito Aruba): `A @ 62.149.128.40`, `www`, `ftp`. Al 
 | `RESEND_API_KEY` | secret | alternativa a Gmail |
 | `ORDER_NOTIFICATION_EMAIL` | secret | destinatari notifiche, separati da virgola |
 | `PUBLIC_CF_BEACON_TOKEN` | build | Cloudflare Web Analytics (senza cookie); vuoto = nessuno script |
+| `PUBLIC_GA_MEASUREMENT_ID` | build, in `.env.production` | Google Analytics 4 con banner cookie (vedi sotto); vuoto = niente GA e niente banner. Solo nelle build di produzione, così lo sviluppo locale non sporca i dati |
 | `TURNSTILE_SECRET_KEY`, `PUBLIC_TURNSTILE_SITE_KEY` | secret / build | anti-spam dei form. Senza chiavi il widget non appare e la verifica è saltata (solo honeypot) |
 
 Lo schema tipizzato è in `astro.config.mjs` (`env.schema`); nel codice si importano da `astro:env/server`.
 
+## Statistiche
+
+Si usa **Google Analytics 4**: visite, percorso d'acquisto e provenienza di chi compra. Usa cookie, quindi parte solo dopo "Accetta" nel banner (`src/components/ConsentBanner.astro`). Chi rifiuta o usa un adblock non viene contato, quindi le visite reali sono di più.
+
+Cloudflare Web Analytics (senza cookie, conta anche chi rifiuta) è predisposto ma spento: si accende con `PUBLIC_CF_BEACON_TOKEN`. Se lo si accende, va aggiunto a cookie policy e privacy policy.
+
+Come funziona il consenso (`src/lib/analytics.ts`):
+
+- prima della scelta nessuno script di Google e nessun cookie; gli eventi della pagina aspettano in memoria e partono solo se arriva "Accetta";
+- "Rifiuta" e "Accetta" hanno lo stesso peso; la scelta vale 6 mesi, poi il banner ricompare;
+- "Gestisci cookie" nel footer riapre il banner; revocando, i cookie `_ga` vengono cancellati;
+- consenso solo statistico: pubblicità, personalizzazione e Google Signals restano spenti.
+
+Eventi e-commerce inviati: `view_item` (scheda prodotto), `add_to_cart`, `begin_checkout` (bottone del carrello), `purchase` (pagina `/ordine/grazie`, una volta per ordine, dati letti da Stripe). Gli importi sono in euro; `item_id` è l'id del prodotto in Sanity.
+
+Proprietà GA4: stream web "Frenz Jewelz", ID di misurazione `G-TDXK9B0YNM` (in `.env.production`, file fuori da git). Impostazioni da tenere: conservazione dati a 14 mesi, Google Signals spento, FRENZ amministratore. Da fare quando si attiva GA: aggiornare cookie policy e privacy policy in Sanity (GA, Google come responsabile, trasferimento negli USA con Data Privacy Framework). Per le vendite vere fanno fede Stripe e gli ordini in Sanity.
+
 ## Font dei titoli
 
-Aerosoldier di Måns Grebäck, versione Regular, ridotta ai caratteri latini e convertita in WOFF2 (`public/fonts/aerosoldier.woff2`, ~165 KB). È un font a pagamento: il file **non è nel repository** (pubblico) e va copiato a mano in `public/fonts/` su chi fa il deploy. Per l'uso sul sito serve la licenza **Commercial** (fino a 10.000 visualizzazioni di pagina al mese). Senza il file, i titoli usano Sedgwick Ave Display (Google Fonts, gratuito).
+Aerosoldier di Måns Grebäck, versione Regular, ridotta ai caratteri latini e convertita in WOFF2 (~165 KB). È un font a pagamento: il file **non è nel repository** (pubblico). Finché manca la licenza sta in `font-da-licenziare/aerosoldier.woff2` (ignorata da git, fuori da `public/`, quindi non va online); con la licenza si sposta in `public/fonts/` sul computer di chi fa il deploy. Per l'uso sul sito serve la licenza **Commercial** (fino a 10.000 visualizzazioni di pagina al mese). Senza il file, i titoli usano Sedgwick Ave Display (Google Fonts, gratuito).
 
 Stato licenza: **da acquistare** (05/11/2026).
 

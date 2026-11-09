@@ -1,9 +1,10 @@
 ---
 import '@fontsource/sedgwick-ave-display/latin-400.css'
 import '../styles/global.css'
-import {PUBLIC_CF_BEACON_TOKEN} from 'astro:env/client'
+import {PUBLIC_CF_BEACON_TOKEN, PUBLIC_GA_MEASUREMENT_ID} from 'astro:env/client'
 import Header from '../components/Header.astro'
 import Footer from '../components/Footer.astro'
+import ConsentBanner from '../components/ConsentBanner.astro'
 import CartDrawer from '../islands/CartDrawer.astro'
 import {sanity, urlFor} from '../lib/sanity'
 import {SETTINGS_QUERY} from '../lib/queries'
@@ -73,7 +74,9 @@ const ogImageAlt = ogImage?.alt ?? 'Frenz Jewelz, gioielli in argento 925 fatti 
     </main>
     <Footer instagramUrl={settings?.instagramUrl} facebookUrl={settings?.facebookUrl} contactEmail={settings?.contactEmail} legalName={settings?.legalName} vatNumber={settings?.vatNumber} legalAddress={settings?.legalAddress} />
     <CartDrawer />
-    {/* Cloudflare Web Analytics: niente cookie, niente banner. Attivo solo con il token. */}
+    {/* Google Analytics: parte solo dopo "Accetta" nel banner. Attivo solo con l'ID. */}
+    {PUBLIC_GA_MEASUREMENT_ID && <ConsentBanner />}
+    {/* Cloudflare Web Analytics: niente cookie, non serve consenso. Attivo solo con il token. */}
     {PUBLIC_CF_BEACON_TOKEN && <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon={JSON.stringify({token: PUBLIC_CF_BEACON_TOKEN})} is:inline />}
   </body>
 </html>

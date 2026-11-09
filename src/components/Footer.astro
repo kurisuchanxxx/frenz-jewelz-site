@@ -1,4 +1,6 @@
 ---
+import {PUBLIC_GA_MEASUREMENT_ID} from 'astro:env/client'
+
 interface Props {
   instagramUrl?: string
   facebookUrl?: string
@@ -31,7 +33,11 @@ const LEGAL = [
       </nav>
       <nav aria-label="Note legali">
         <p class="eyebrow">Legale</p>
-        <ul>{LEGAL.map((l) => <li><a href={l.href}>{l.label}</a></li>)}</ul>
+        <ul>
+          {LEGAL.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+          {/* Riapre il banner di ConsentBanner.astro: revocare deve essere facile quanto accettare. */}
+          {PUBLIC_GA_MEASUREMENT_ID && <li><button type="button" class="footer__link" data-consent-open>Gestisci cookie</button></li>}
+        </ul>
       </nav>
       <div>
         <p class="eyebrow">Contatti</p>
@@ -83,13 +89,24 @@ const LEGAL = [
     gap: 0.4rem;
   }
 
-  .footer a {
+  .footer a,
+  .footer__link {
     color: var(--grey-300);
     text-decoration: none;
     font-size: 0.9375rem;
   }
 
-  .footer a:hover {
+  .footer__link {
+    padding: 0;
+    border: 0;
+    background: none;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .footer a:hover,
+  .footer__link:hover {
     color: var(--white);
   }
 

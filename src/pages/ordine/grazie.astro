@@ -7,10 +7,33 @@ import {formatPrice} from '../../lib/money'
 // l'ordine vero lo scrive il webhook.
 const sessionId = Astro.url.searchParams.get('session_id')
 let summary: {email?: string; total?: number; paid: boolean} | null = null
+// Evento "purchase" per Google Analytics (lo invia il browser, solo con consenso). Importi in euro.
+let purchase: Record<string, unknown> | null = null
 if (sessionId) {
   try {
-    const s = await getStripe().checkout.sessions.retrieve(sessionId)
+    const s = await getStripe().checkout.sessions.retrieve(sessionId, {expand: ['line_items.data.price.product']})
     summary = {email: s.customer_details?.email ?? undefined, total: s.amount_total ?? undefined, paid: s.payment_status === 'paid'}
+    if (summary.paid) {
+      const shipping = s.total_details?.amount_shipping ?? 0
+      const discount = s.total_details?.amount_discount ?? 0
+      purchase = {
+        transaction_id: s.id,
+        currency: 'EUR',
+        // GA4: value = merce al netto degli sconti, spedizione a parte.
+        value: ((s.amount_subtotal ?? 0) - discount) / 100,
+        shipping: shipping / 100,
+        items: (s.line_items?.data ?? []).map((li) => {
+          const product = li.price?.product
+          const sanityId = typeof product === 'object' && product && !product.deleted ? product.metadata.sanityId : undefined
+          return {
+            item_id: sanityId ?? li.price?.id,
+            item_name: li.description ?? '',
+            price: (li.price?.unit_amount ?? 0) / 100,
+            quantity: li.quantity ?? 1,
+          }
+        }),
+      }
+    }
   } catch {
     summary = null
   }
@@ -18,7 +41,7 @@ if (sessionId) {
 ---
 
 <BaseLayout title="Ordine completato" noindex>
-  <section class="container thanks">
+  <section class="container thanks" data-ga-purchase={purchase ? JSON.stringify(purchase) : undefined}>
     <p class="eyebrow">Ordine completato</p>
     <h1>Grazie.</h1>
     {
@@ -38,7 +61,12 @@ if (sessionId) {
 
 <script>
   import {cart} from '../../lib/cart'
+  import {trackPurchase} from '../../lib/analytics'
+
   cart.clear()
+
+  const raw = document.querySelector<HTMLElement>('[data-ga-purchase]')?.dataset.gaPurchase
+  if (raw) trackPurchase(JSON.parse(raw))
 </script>
 
 <style>

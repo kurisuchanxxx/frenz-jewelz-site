@@ -1,0 +1,107 @@
+---
+// Banner cookie per Google Analytics. Montato nel layout solo se PUBLIC_GA_MEASUREMENT_ID è impostato:
+// senza GA il sito non usa cookie che richiedono consenso e il banner non serve.
+// "Rifiuta" e "Accetta" hanno lo stesso peso visivo, come chiede il Garante.
+// Si riapre dal bottone "Gestisci cookie" nel footer (data-consent-open).
+---
+
+<section class="consent" id="consent" aria-labelledby="consent-title" hidden>
+  <div class="consent__text">
+    <p class="eyebrow" id="consent-title">Cookie</p>
+    <p>
+      Se sei d'accordo usiamo Google Analytics per capire come viene usato il sito e cosa migliorare. Niente
+      pubblicità, niente profilazione. Se rifiuti il sito funziona allo stesso modo. <a href="/cookie">Cookie policy</a>
+    </p>
+  </div>
+  <div class="consent__actions">
+    <button type="button" class="btn" data-consent-choice="denied">Rifiuta</button>
+    <button type="button" class="btn" data-consent-choice="granted">Accetta</button>
+  </div>
+</section>
+
+<script>
+  import {analyticsEnabled, getConsent, initAnalytics, setConsent, type Consent} from '../lib/analytics'
+
+  const banner = document.getElementById('consent')
+
+  if (analyticsEnabled && banner) {
+    let returnFocus: HTMLElement | null = null
+
+    const hide = () => {
+      banner.hidden = true
+      returnFocus?.focus()
+      returnFocus = null
+    }
+
+    banner.querySelectorAll<HTMLButtonElement>('[data-consent-choice]').forEach((btn) =>
+      btn.addEventListener('click', () => {
+        setConsent(btn.dataset.consentChoice as Consent)
+        hide()
+      }),
+    )
+
+    document.querySelectorAll<HTMLElement>('[data-consent-open]').forEach((el) =>
+      el.addEventListener('click', () => {
+        returnFocus = el
+        banner.hidden = false
+        banner.querySelector<HTMLButtonElement>('[data-consent-choice]')?.focus()
+      }),
+    )
+
+    const consent = getConsent()
+    if (consent === 'granted') initAnalytics()
+    else if (consent === null) banner.hidden = false
+  }
+</script>
+
+<style>
+  .consent {
+    position: fixed;
+    left: var(--gutter);
+    right: var(--gutter);
+    bottom: calc(var(--gutter) + env(safe-area-inset-bottom));
+    z-index: 55; /* sopra l'header, sotto la lente della galleria e il carrello */
+    display: grid;
+    gap: 1rem;
+    max-width: 640px;
+    padding: 1.25rem;
+    background: var(--black);
+    border: 1px solid var(--grey-700);
+    box-shadow: 0 8px 30px rgb(0 0 0 / 0.5);
+  }
+
+  .consent[hidden] {
+    display: none;
+  }
+
+  .consent__text p {
+    margin: 0;
+  }
+
+  .consent__text p + p {
+    margin-top: 0.5rem;
+    font-size: 0.9375rem;
+    color: var(--grey-100);
+  }
+
+  .consent__text a {
+    color: var(--white);
+  }
+
+  .consent__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  @media (min-width: 640px) {
+    .consent {
+      grid-template-columns: 1fr auto;
+      align-items: end;
+    }
+
+    .consent__actions {
+      grid-template-columns: auto auto;
+    }
+  }
+</style>

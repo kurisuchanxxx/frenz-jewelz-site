@@ -35,3 +35,6 @@ frenzjewelzwebp/
 
 # Font con licenza (Aerosoldier): NON nel repo pubblico. Va messo a mano in public/fonts/ prima del deploy.
 public/fonts/
+
+# Font a pagamento senza licenza: fuori da public/ (non va online) e fuori da git (repo pubblico)
+font-da-licenziare/

@@ -55,6 +55,7 @@
 
 <script>
   import {cart, formatPrice, type CartItem} from '../lib/cart'
+  import {gaItem, track} from '../lib/analytics'
 
   const drawer = document.getElementById('cart-drawer')!
   const panel = drawer.querySelector<HTMLElement>('.drawer__panel')!
@@ -136,6 +137,12 @@
         image: d.productImage,
         max: Number(d.maxQuantity) || 1,
       })
+      const price = Number(d.productPrice)
+      track('add_to_cart', {
+        currency: 'EUR',
+        value: price / 100,
+        items: [gaItem({id: d.productId!, name: d.productTitle!, price, category: d.productCategory})],
+      })
       open()
     })
   })
@@ -144,6 +151,11 @@
     checkout.disabled = true
     checkout.textContent = 'Un attimo…'
     error.hidden = true
+    track('begin_checkout', {
+      currency: 'EUR',
+      value: cart.subtotal() / 100,
+      items: cart.get().map((i) => gaItem({id: i.id, name: i.title, price: i.price, quantity: i.qty})),
+    })
     try {
       const res = await fetch('/api/checkout', {
         method: 'POST',
